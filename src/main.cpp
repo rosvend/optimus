@@ -1,48 +1,40 @@
 #include <Arduino.h>
+#include "config/controls_config.h"
+#include "config/motors_config.h"
+#include "config/ramp_config.h"
+#include "drive.h"
+#include "motor.h"
 #include "ramp.h"
 
-// L298N inputs (ENA/ENB jumpers on); both channels mirrored until we know which one is wired
-const int CHANNELS[][2] = {{5, 6}, {7, 8}};
-const int BUTTON_PIN = 41;
-
-const int SPEED_STEP = 51;
-const float ACCEL_PER_SECOND = 170.0f;
-const unsigned long REVERSE_PAUSE_MS = 500;
-const unsigned long LOOP_MS = 10;
-
-SpeedRamp ramp(ACCEL_PER_SECOND, REVERSE_PAUSE_MS);
-
-void drive(int speed) {
-  int duty = abs(speed);
-  for (auto &pins : CHANNELS) {
-    analogWrite(pins[0], speed > 0 ? duty : 0);
-    analogWrite(pins[1], speed < 0 ? duty : 0);
-  }
-}
+Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACKWARD_PIN);
+Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACKWARD_PIN);
+SpeedRamp leftRamp(ACCEL_PER_SECOND, REVERSE_PAUSE_MS);
+SpeedRamp rightRamp(ACCEL_PER_SECOND, REVERSE_PAUSE_MS);
+Targets targets = {0, 0};
 
 void handleKey(char key) {
-  int before = ramp.target();
-  switch (key) {
-    case 'w': ramp.setTarget(ramp.target() + SPEED_STEP); break;
-    case 's': ramp.setTarget(ramp.target() - SPEED_STEP); break;
-    case ' ':
-    case 'x': ramp.setTarget(0); break;
-    default: return;
-  }
-  if (ramp.target() != before) Serial.printf("target: %d\n", ramp.target());
+  Targets next = applyKey(targets, key, SPEED_STEP);
+  if (next.left == targets.left && next.right == targets.right) return;
+
+  targets = next;
+  leftRamp.setTarget(targets.left);
+  rightRamp.setTarget(targets.right);
+  Serial.printf("left: %d  right: %d\n", targets.left, targets.right);
 }
 
 void setup() {
-  Serial.begin(115200);
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
-  drive(0);
-  Serial.println("w = faster forward, s = faster backward, space/x/button = stop");
+  Serial.begin(SERIAL_BAUD);
+  pinMode(STOP_BUTTON_PIN, INPUT_PULLUP);
+  leftMotor.drive(0);
+  rightMotor.drive(0);
+  Serial.println("w/s = forward/backward, a/d = spin left/right, space/x/button = stop");
 }
 
 void loop() {
   while (Serial.available()) handleKey(Serial.read());
-  if (digitalRead(BUTTON_PIN) == LOW) handleKey('x');
+  if (digitalRead(STOP_BUTTON_PIN) == LOW) handleKey('x');
 
-  drive(ramp.update(LOOP_MS));
+  leftMotor.drive(leftRamp.update(LOOP_MS));
+  rightMotor.drive(rightRamp.update(LOOP_MS));
   delay(LOOP_MS);
 }
