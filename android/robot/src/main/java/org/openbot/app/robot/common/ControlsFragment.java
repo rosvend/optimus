@@ -194,6 +194,9 @@ public abstract class ControlsFragment extends Fragment implements ServerListene
                     vehicle.setRightWheelRpm(Float.parseFloat(itemList[1]));
                   }
                   break;
+                case 'e':
+                  vehicle.processEnvMessage(body);
+                  break;
                 case 'b':
                   // do nothing
                   break;

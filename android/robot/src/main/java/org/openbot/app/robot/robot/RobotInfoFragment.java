@@ -138,8 +138,10 @@ public class RobotInfoFragment extends ControlsFragment {
       binding.voltageInfo.setText(R.string.voltage);
       binding.speedInfo.setText(R.string.rpm);
       binding.sonarInfo.setText(R.string.distance);
+      binding.environmentInfo.setText(R.string.environment_empty);
       vehicle.setHasVoltageDivider(false);
       vehicle.setHasSonar(false);
+      vehicle.setHasEnvSensor(false);
       vehicle.setHasIndicators(false);
       vehicle.setHasLedsFront(false);
       vehicle.setHasLedsBack(false);
@@ -205,6 +207,15 @@ public class RobotInfoFragment extends ControlsFragment {
         break;
       case 's':
         binding.sonarInfo.setText(String.format(Locale.US, "%3.0f cm", vehicle.getSonarReading()));
+        break;
+      case 'e':
+        if (!vehicle.hasEnvReading()) break;
+        binding.environmentInfo.setText(
+            String.format(
+                Locale.US,
+                "%.1f °C · %.1f %%",
+                vehicle.getTemperature(),
+                vehicle.getHumidity()));
         break;
     }
   }

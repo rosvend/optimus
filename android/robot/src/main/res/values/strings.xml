@@ -55,6 +55,8 @@
     <string name="rpm">***,*** rpm</string>
     <string name="voltage">**.* V</string>
     <string name="distance">*** cm</string>
+    <string name="environment">Temp / Humedad</string>
+    <string name="environment_empty">--</string>
     <string name="time_ms">*** ms</string>
     <string name="time_fps">*** fps</string>
     <string name="resolution">*** x ***</string>
