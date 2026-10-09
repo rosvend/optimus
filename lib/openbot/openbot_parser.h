@@ -1,6 +1,6 @@
 #pragma once
 
-enum class MessageType { None, Control, Heartbeat, Feature };
+enum class MessageType { None, Control, Heartbeat, Feature, SonarInterval };
 
 struct Message {
   MessageType type;
@@ -9,7 +9,7 @@ struct Message {
   long intervalMs;
 };
 
-// Parses OpenBot's newline-terminated lines: c<left>,<right>  h<ms>  f
+// Parses OpenBot's newline-terminated lines: c<left>,<right>  h<ms>  f  s<ms>
 class OpenBotParser {
 public:
   Message feed(char c);

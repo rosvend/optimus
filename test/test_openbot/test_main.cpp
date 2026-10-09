@@ -67,6 +67,20 @@ void test_oversized_line_is_dropped_then_recovers() {
   TEST_ASSERT_EQUAL(MessageType::Control, (int)feedLine(parser, "c5,6\n").type);
 }
 
+void test_sonar_interval_message() {
+  OpenBotParser parser;
+  Message m = feedLine(parser, "s100\n");
+  TEST_ASSERT_EQUAL(MessageType::SonarInterval, (int)m.type);
+  TEST_ASSERT_EQUAL(100, m.intervalMs);
+}
+
+void test_sonar_interval_zero_is_parsed() {
+  OpenBotParser parser;
+  Message m = feedLine(parser, "s0\n");
+  TEST_ASSERT_EQUAL(MessageType::SonarInterval, (int)m.type);
+  TEST_ASSERT_EQUAL(0, m.intervalMs);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_incomplete_line_yields_nothing);
@@ -78,5 +92,7 @@ int main() {
   RUN_TEST(test_malformed_control_is_ignored);
   RUN_TEST(test_parser_recovers_after_bad_line);
   RUN_TEST(test_oversized_line_is_dropped_then_recovers);
+  RUN_TEST(test_sonar_interval_message);
+  RUN_TEST(test_sonar_interval_zero_is_parsed);
   return UNITY_END();
 }
