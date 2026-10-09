@@ -67,6 +67,38 @@ void test_oversized_line_is_dropped_then_recovers() {
   TEST_ASSERT_EQUAL(MessageType::Control, (int)feedLine(parser, "c5,6\n").type);
 }
 
+void test_control_rejects_garbage_numbers() {
+  const char *lines[] = {"c,5\n", "cab,5\n", "c5,\n", "c5,6x\n", "c5x,6\n", "c5;6\n"};
+  for (const char *line : lines) {
+    OpenBotParser parser;
+    TEST_ASSERT_EQUAL_MESSAGE(MessageType::None, (int)feedLine(parser, line).type, line);
+  }
+}
+
+void test_control_rejects_out_of_range_targets() {
+  const char *lines[] = {"c256,0\n", "c0,-256\n", "c999,999\n"};
+  for (const char *line : lines) {
+    OpenBotParser parser;
+    TEST_ASSERT_EQUAL_MESSAGE(MessageType::None, (int)feedLine(parser, line).type, line);
+  }
+}
+
+void test_control_accepts_full_range() {
+  OpenBotParser parser;
+  Message m = feedLine(parser, "c255,-255\n");
+  TEST_ASSERT_EQUAL(MessageType::Control, (int)m.type);
+  TEST_ASSERT_EQUAL(255, m.left);
+  TEST_ASSERT_EQUAL(-255, m.right);
+}
+
+void test_heartbeat_rejects_bad_intervals() {
+  const char *lines[] = {"hx\n", "h-5\n", "h250x\n", "h\n"};
+  for (const char *line : lines) {
+    OpenBotParser parser;
+    TEST_ASSERT_EQUAL_MESSAGE(MessageType::None, (int)feedLine(parser, line).type, line);
+  }
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_incomplete_line_yields_nothing);
@@ -78,5 +110,9 @@ int main() {
   RUN_TEST(test_malformed_control_is_ignored);
   RUN_TEST(test_parser_recovers_after_bad_line);
   RUN_TEST(test_oversized_line_is_dropped_then_recovers);
+  RUN_TEST(test_control_rejects_garbage_numbers);
+  RUN_TEST(test_control_rejects_out_of_range_targets);
+  RUN_TEST(test_control_accepts_full_range);
+  RUN_TEST(test_heartbeat_rejects_bad_intervals);
   return UNITY_END();
 }

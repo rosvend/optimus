@@ -2,6 +2,16 @@
 #include <stdlib.h>
 
 static const Message NO_MESSAGE = {MessageType::None, 0, 0, 0};
+static const long MAX_TARGET = 255;
+
+static bool readNumber(const char *text, long &value, const char *&end) {
+  char *stop;
+  value = strtol(text, &stop, 10);
+  end = stop;
+  return stop != text;
+}
+
+static bool inRange(long value) { return value >= -MAX_TARGET && value <= MAX_TARGET; }
 
 Message OpenBotParser::feed(char c) {
   if (c == '\r') return NO_MESSAGE;
@@ -25,13 +35,19 @@ Message OpenBotParser::parse() const {
   const char *body = line_ + 1;
   switch (line_[0]) {
     case 'c': {
-      char *comma;
-      long left = strtol(body, &comma, 10);
-      if (*comma != ',') return NO_MESSAGE;
-      long right = strtol(comma + 1, nullptr, 10);
+      long left, right;
+      const char *end;
+      if (!readNumber(body, left, end) || *end != ',') return NO_MESSAGE;
+      if (!readNumber(end + 1, right, end) || *end != '\0') return NO_MESSAGE;
+      if (!inRange(left) || !inRange(right)) return NO_MESSAGE;
       return {MessageType::Control, (int)left, (int)right, 0};
     }
-    case 'h': return {MessageType::Heartbeat, 0, 0, atol(body)};
+    case 'h': {
+      long interval;
+      const char *end;
+      if (!readNumber(body, interval, end) || *end != '\0' || interval < 0) return NO_MESSAGE;
+      return {MessageType::Heartbeat, 0, 0, interval};
+    }
     case 'f': return {MessageType::Feature, 0, 0, 0};
     default: return NO_MESSAGE;
   }

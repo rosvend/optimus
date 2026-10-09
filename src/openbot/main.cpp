@@ -14,6 +14,7 @@ SpeedRamp leftRamp(ACCEL_PER_SECOND, REVERSE_PAUSE_MS);
 SpeedRamp rightRamp(ACCEL_PER_SECOND, REVERSE_PAUSE_MS);
 OpenBotParser parser;
 Heartbeat heartbeat;
+unsigned long lastLoopMs = 0;
 
 void setTargets(int left, int right) {
   leftRamp.setTarget(left);
@@ -34,13 +35,20 @@ void setup() {
   leftMotor.drive(0);
   rightMotor.drive(0);
   Serial.println('r');
+  lastLoopMs = millis();
 }
 
 void loop() {
-  while (Serial.available()) handle(parser.feed(Serial.read()));
-  if (heartbeat.expired(LOOP_MS)) setTargets(0, 0);
+  for (int i = 0; i < MAX_SERIAL_BYTES_PER_LOOP && Serial.available(); i++) {
+    handle(parser.feed(Serial.read()));
+  }
 
-  leftMotor.drive(leftRamp.update(LOOP_MS));
-  rightMotor.drive(rightRamp.update(LOOP_MS));
+  unsigned long now = millis();
+  unsigned long elapsedMs = now - lastLoopMs;
+  lastLoopMs = now;
+
+  if (heartbeat.expired(elapsedMs)) setTargets(0, 0);
+  leftMotor.drive(leftRamp.update(elapsedMs));
+  rightMotor.drive(rightRamp.update(elapsedMs));
   delay(LOOP_MS);
 }
