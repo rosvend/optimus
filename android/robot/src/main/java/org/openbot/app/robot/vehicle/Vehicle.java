@@ -14,6 +14,7 @@ import org.openbot.app.robot.env.SensorReading;
 import org.openbot.app.robot.main.CommonRecyclerViewAdapter;
 import org.openbot.app.robot.main.ScanDeviceAdapter;
 import org.openbot.app.robot.utils.Enums;
+import org.openbot.app.robot.utils.FormatUtils;
 
 public class Vehicle {
 
@@ -48,6 +49,10 @@ public class Vehicle {
   private boolean hasLedsFront = false;
   private boolean hasLedsBack = false;
   private boolean hasLedsStatus = false;
+  private boolean hasEnvSensor = false;
+  private float temperature = 0f;
+  private float humidity = 0f;
+  private boolean hasEnvReading = false;
   private boolean isReady = false;
   private BluetoothManager bluetoothManager;
   SharedPreferences sharedPreferences;
@@ -107,6 +112,38 @@ public class Vehicle {
 
   public void setHasSonar(boolean hasSonar) {
     this.hasSonar = hasSonar;
+  }
+
+  public boolean isHasEnvSensor() {
+    return hasEnvSensor;
+  }
+
+  public void setHasEnvSensor(boolean hasEnvSensor) {
+    this.hasEnvSensor = hasEnvSensor;
+  }
+
+  public float getTemperature() {
+    return temperature;
+  }
+
+  public float getHumidity() {
+    return humidity;
+  }
+
+  // False until a well-formed "e" line arrives (ignores e.g. the ESP32 boot banner).
+  public boolean hasEnvReading() {
+    return hasEnvReading;
+  }
+
+  // Body of an "e<temperature>,<humidity>" line; malformed bodies are ignored.
+  public void processEnvMessage(String body) {
+    String[] parts = body.split(",", -1);
+    if (parts.length != 2 || !FormatUtils.isNumeric(parts[0]) || !FormatUtils.isNumeric(parts[1])) {
+      return;
+    }
+    temperature = Float.parseFloat(parts[0]);
+    humidity = Float.parseFloat(parts[1]);
+    hasEnvReading = true;
   }
 
   public boolean isHasBumpSensor() {
@@ -202,6 +239,9 @@ public class Vehicle {
     }
     if (message.contains(":ls:")) {
       setHasLedsStatus(true);
+    }
+    if (message.contains(":e:")) {
+      setHasEnvSensor(true);
     }
   }
 
