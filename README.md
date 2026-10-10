@@ -2,11 +2,9 @@
 Optimus is an autonomous car built using Lora32, YOLOv8, ROS 2 and LiDAR sensors. You can find the full list of components in the [hardware components guide](docs/hardware-components.md).
 
 <p align="center">
-  <video src="docs/media/working.mp4" width="640" controls muted loop>
-    <a href="docs/media/working.mp4">Watch the demo video</a>
-  </video>
+  <img src="docs/media/working.gif" width="480" alt="Optimus tracks running from an OpenBot phone">
   <br>
-  <em>Optimus tracks driven from a phone running OpenBot and an M5Stack AtomS3.</em>
+  <em>Optimus tracks driven from a phone running OpenBot and an M5Stack AtomS3 (<a href="docs/media/working.mp4">full video</a>).</em>
 </p>
 
 ## Quick start (OpenBot)
