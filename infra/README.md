@@ -74,16 +74,27 @@ curl "$URL?sensor=gps&from=2026-10-14T00:00:00Z&limit=20" -H "x-api-key: $KEY"
 You need Terraform ≥ 1.6, and the `academy` AWS profile with fresh credentials from the Learner Lab "AWS Details" panel.
 
 ```bash
-cd infra/terraform
+cd infra
 terraform init
 terraform apply
 terraform output -raw ingest_url
 terraform output -raw api_key        # share privately with the team
 ```
 
-- **Settings:** all tunables live in `terraform/terraform.tfvars` (Terraform) and `lambda/config.py` (API limits and ranges).
+- **Settings:** all tunables live in `terraform.tfvars` (Terraform) and `lambda/config.py` (API limits and ranges).
 - **State:** the Terraform state is local and gitignored, so deploy from the same machine. Re-running `apply` keeps the same URL and key.
 - **Teardown:** `terraform destroy` removes everything, including the data.
+
+## Layout
+
+```
+infra/
+├── main.tf, variables.tf, terraform.tfvars, outputs.tf   # root: wires the modules together
+├── modules/
+│   ├── dynamodb/   # readings table
+│   └── lambda/     # function, public URL, log group
+└── lambda/         # Python source for the function, with tests
+```
 
 ## Tests
 

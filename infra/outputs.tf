@@ -1,6 +1,6 @@
 output "ingest_url" {
   description = "Public URL for POSTing and GETting readings"
-  value       = aws_lambda_function_url.telemetry.function_url
+  value       = module.lambda.function_url
 }
 
 output "api_key" {
@@ -11,5 +11,5 @@ output "api_key" {
 
 output "table_name" {
   description = "DynamoDB table holding the readings"
-  value       = aws_dynamodb_table.readings.name
+  value       = module.dynamodb.table_name
 }

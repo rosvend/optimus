@@ -78,7 +78,7 @@ Testing/
 .terraform/
 *.tfstate
 *.tfstate.*
-infra/terraform/build/
+infra/build/
 
 # Python
 __pycache__/
