@@ -37,3 +37,7 @@ An Android phone running [OpenBot](https://github.com/ob-f/OpenBot) acts as the 
 pio test -e native                    # run the unit tests on your laptop
 pio run -e atoms3 -t upload           # keyboard control over serial (w/s/a/d, space to stop)
 ```
+
+## Telemetry
+
+Sensor readings (temperature, humidity, GPS) go to a serverless API on AWS. See the [infra guide](infra/README.md) for the upload format and deployment.

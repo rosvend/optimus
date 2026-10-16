@@ -74,3 +74,12 @@ Testing/
 .vscode/launch.json
 .vscode/ipch
 .vscode/
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+infra/build/
+
+# Python
+__pycache__/
+.pytest_cache/
