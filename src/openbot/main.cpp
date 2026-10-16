@@ -1,5 +1,3 @@
-#include <Arduino.h>
-#include <Wire.h>
 #include "config/controls_config.h"
 #include "config/motors_config.h"
 #include "config/openbot_config.h"
@@ -12,8 +10,11 @@
 #include "ramp.h"
 #include "sonar.h"
 #include "telemetry.h"
+#include <Arduino.h>
+#include <Wire.h>
 
-// Serial is the link to the OpenBot app: only protocol lines may be written to it.
+// Serial is the link to the OpenBot app: only protocol lines may be written to
+// it.
 
 Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACKWARD_PIN);
 Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACKWARD_PIN);
@@ -23,6 +24,7 @@ OpenBotParser parser;
 Heartbeat heartbeat;
 SonarFilter sonarFilter;
 
+unsigned long lastLoopMs = 0;
 unsigned long sonarIntervalMs = SONAR_DEFAULT_INTERVAL_MS;
 unsigned long lastPingMs = 0;
 bool pingPending = false;
@@ -56,27 +58,37 @@ void setTargets(int left, int right) {
 
 void sendFeatures() {
   char line[32];
-  if (formatFeatures(line, sizeof(line), ROBOT_TYPE)) sendLine(line);
+  if (formatFeatures(line, sizeof(line), ROBOT_TYPE))
+    sendLine(line);
 }
 
 void handle(const Message &message) {
   switch (message.type) {
-    case MessageType::Control: setTargets(message.left, message.right); break;
-    case MessageType::Heartbeat: heartbeat.beat(message.intervalMs); break;
-    case MessageType::Feature: sendFeatures(); break;
-    case MessageType::SonarInterval:
-      sonarIntervalMs = max((unsigned long)message.intervalMs, SONAR_TIMEOUT_MS);
-      break;
-    default: break;
+  case MessageType::Control:
+    setTargets(message.left, message.right);
+    break;
+  case MessageType::Heartbeat:
+    heartbeat.beat(message.intervalMs);
+    break;
+  case MessageType::Feature:
+    sendFeatures();
+    break;
+  case MessageType::SonarInterval:
+    sonarIntervalMs = max((unsigned long)message.intervalMs, SONAR_TIMEOUT_MS);
+    break;
+  default:
+    break;
   }
 }
 
 void reportSonar(unsigned long echoUs) {
   char line[16];
-  if (formatSonar(line, sizeof(line), sonarFilter.add(echoUsToCm(echoUs)))) sendLine(line);
+  if (formatSonar(line, sizeof(line), sonarFilter.add(echoUsToCm(echoUs))))
+    sendLine(line);
 }
 
-// Fires TRIG every sonarIntervalMs; the echo is timed by onEcho() so the loop never blocks.
+// Fires TRIG every sonarIntervalMs; the echo is timed by onEcho() so the loop
+// never blocks.
 void updateSonar(unsigned long now) {
   if (pingPending) {
     if (echoDone) {
@@ -88,7 +100,8 @@ void updateSonar(unsigned long now) {
     }
     return;
   }
-  if (now - lastPingMs < sonarIntervalMs) return;
+  if (now - lastPingMs < sonarIntervalMs)
+    return;
 
   echoDone = false;
   digitalWrite(SONAR_TRIG_PIN, HIGH);
@@ -100,35 +113,42 @@ void updateSonar(unsigned long now) {
 
 void configureHdc1080() {
   Wire.beginTransmission(HDC1080_ADDR);
-  Wire.write(0x02);  // configuration register
-  Wire.write(0x10);  // sequential temperature + humidity, 14 bit
+  Wire.write(0x02); // configuration register
+  Wire.write(0x10); // sequential temperature + humidity, 14 bit
   Wire.write(0x00);
   Wire.endTransmission();
 }
 
-// Two steps so the loop never waits: trigger a conversion, read it on a later pass.
+// Two steps so the loop never waits: trigger a conversion, read it on a later
+// pass.
 void updateEnv(unsigned long now) {
   if (!envConverting) {
-    if (now - lastEnvMs < ENV_INTERVAL_MS) return;
+    if (now - lastEnvMs < ENV_INTERVAL_MS)
+      return;
     lastEnvMs = now;
     Wire.beginTransmission(HDC1080_ADDR);
-    Wire.write(0x00);  // temperature register starts a conversion
+    Wire.write(0x00); // temperature register starts a conversion
     envConverting = Wire.endTransmission() == 0;
     envStartMs = now;
     return;
   }
-  if (now - envStartMs < HDC1080_CONVERSION_MS) return;
+  if (now - envStartMs < HDC1080_CONVERSION_MS)
+    return;
   envConverting = false;
 
-  if (Wire.requestFrom(HDC1080_ADDR, 4) != 4) return;
-  // One read per statement: the evaluation order of `a << 8 | b` is unspecified.
+  if (Wire.requestFrom(HDC1080_ADDR, 4) != 4)
+    return;
+  // One read per statement: the evaluation order of `a << 8 | b` is
+  // unspecified.
   uint16_t rawTemp = Wire.read() << 8;
   rawTemp |= Wire.read();
   uint16_t rawHum = Wire.read() << 8;
   rawHum |= Wire.read();
 
   char line[24];
-  if (formatEnv(line, sizeof(line), hdcTemperatureC(rawTemp), hdcHumidityPct(rawHum))) sendLine(line);
+  if (formatEnv(line, sizeof(line), hdcTemperatureC(rawTemp),
+                hdcHumidityPct(rawHum)))
+    sendLine(line);
 }
 
 void setup() {
@@ -145,11 +165,14 @@ void setup() {
   configureHdc1080();
 
   sendLine("r");
+  Serial.println('r');
+  lastLoopMs = millis();
 }
 
 void loop() {
-  while (Serial.available()) handle(parser.feed(Serial.read()));
-  if (heartbeat.expired(LOOP_MS)) setTargets(0, 0);
+  for (int i = 0; i < MAX_SERIAL_BYTES_PER_LOOP && Serial.available(); i++) {
+    handle(parser.feed(Serial.read()));
+  }
 
   unsigned long now = millis();
   updateSonar(now);
@@ -157,5 +180,13 @@ void loop() {
 
   leftMotor.drive(leftRamp.update(LOOP_MS));
   rightMotor.drive(rightRamp.update(LOOP_MS));
+  unsigned long elapsedMs = now - lastLoopMs;
+  lastLoopMs = now;
+
+  if (heartbeat.expired(elapsedMs))
+    setTargets(0, 0);
+  leftMotor.drive(leftRamp.update(elapsedMs));
+  rightMotor.drive(rightRamp.update(elapsedMs));
+
   delay(LOOP_MS);
 }

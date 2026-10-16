@@ -77,3 +77,12 @@ Testing/
 # Local AI tooling docs (not versioned)
 CLAUDE.md
 docs/superpowers/
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+infra/build/
+
+# Python
+__pycache__/
+.pytest_cache/
