@@ -1,0 +1,14 @@
+variable "bucket_prefix" {
+  description = "Prefix for the S3 bucket name; AWS appends a unique suffix"
+  type        = string
+}
+
+variable "source_dir" {
+  description = "Built dashboard files (dashboard/dist)"
+  type        = string
+}
+
+variable "api_url" {
+  description = "Telemetry API URL written into config.json"
+  type        = string
+}

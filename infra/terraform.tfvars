@@ -8,3 +8,4 @@ lambda_memory_mb   = 128
 lambda_timeout_s   = 10
 log_retention_days = 7
 api_key_length     = 32
+cors_allow_origins = ["*"]

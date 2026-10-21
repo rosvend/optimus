@@ -41,3 +41,5 @@ pio run -e atoms3 -t upload           # keyboard control over serial (w/s/a/d, s
 ## Telemetry
 
 Sensor readings (temperature, humidity, GPS) go to a serverless API on AWS. See the [infra guide](infra/README.md) for the upload format and deployment.
+
+A live [dashboard](dashboard/README.md) shows the latest readings, a chart per sensor and the robot's position on a map.

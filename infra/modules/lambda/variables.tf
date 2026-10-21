@@ -43,3 +43,8 @@ variable "environment" {
   type        = map(string)
   sensitive   = true
 }
+
+variable "cors_allow_origins" {
+  description = "Browser origins allowed to call the function URL"
+  type        = list(string)
+}
