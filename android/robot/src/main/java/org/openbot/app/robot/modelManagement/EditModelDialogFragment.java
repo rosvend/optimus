@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 import org.openbot.app.robot.R;
 import org.openbot.app.robot.databinding.DialogEditModelBinding;
-import org.openbot.app.robot.googleServices.GoogleServices;
 import org.openbot.app.robot.main.OnItemClickListener;
 import org.openbot.app.robot.tflite.Model;
 import org.openbot.app.robot.utils.FileUtils;
@@ -31,7 +30,6 @@ public class EditModelDialogFragment extends DialogFragment {
     private DialogEditModelBinding binding;
     private final Model model;
     private List<Model> masterList;
-    public GoogleServices googleServices;
     private final OnItemClickListener<Model> itemClickListener;
 
     public EditModelDialogFragment(Model model, OnItemClickListener<Model> itemClickListener) {
@@ -125,7 +123,6 @@ public class EditModelDialogFragment extends DialogFragment {
                                     + binding.inputHeight.getText().toString());
                     itemClickListener.onItemClick(model);
                     dismiss();
-//                    googleServices.createAndUploadJsonFile();
                     System.out.println("After dismiss ");
 
                 });

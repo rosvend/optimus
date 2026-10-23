@@ -73,6 +73,8 @@ public class BlocklyExecutingFragment extends CameraFragment implements ArCoreLi
   public static boolean isFollowMultipleObject = false;
   public static boolean isStartDetectorAutoPilot = false;
   public static boolean isOnDetection = false;
+  /** JavaScript code of the project to execute, set right before navigating to this fragment. */
+  public static String finalCode;
   private int numberOfFrames = 1;
   public static String classType = "person";
   public static String detectorModelName = "";
@@ -152,13 +154,13 @@ public class BlocklyExecutingFragment extends CameraFragment implements ArCoreLi
               myWebView = new WebView(requireContext());
               // enable JavaScript in the web-view.
               myWebView.getSettings().setJavaScriptEnabled(true);
-              runJSCommand(BarCodeScannerFragment.finalCode);
+              runJSCommand(finalCode);
               handelResetCarButtonClick();
             }
     );
     // Execute the JavaScript code if the js code variable is not null and isRunJSCommand is true
-    if (BarCodeScannerFragment.finalCode != null && isRunJSCommand) {
-      runJSCommand(BarCodeScannerFragment.finalCode);
+    if (finalCode != null && isRunJSCommand) {
+      runJSCommand(finalCode);
     }
 
     modelList = FileUtils.loadConfigJSONFromAsset(requireActivity());
@@ -611,8 +613,8 @@ public class BlocklyExecutingFragment extends CameraFragment implements ArCoreLi
     myWebView = new WebView(requireContext());
     // enable JavaScript in the web-view.
     myWebView.getSettings().setJavaScriptEnabled(true);
-    if (myWebView != null && BarCodeScannerFragment.finalCode != null) {
-      runJSCommand(BarCodeScannerFragment.finalCode);
+    if (myWebView != null && finalCode != null) {
+      runJSCommand(finalCode);
     }
   }
 

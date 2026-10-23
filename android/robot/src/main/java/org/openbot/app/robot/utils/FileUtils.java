@@ -3,7 +3,6 @@ package org.openbot.app.robot.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
@@ -22,8 +21,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
 
-import org.openbot.app.robot.googleServices.GoogleServices;
-import org.openbot.app.robot.projects.GoogleSignInCallback;
 import org.openbot.app.robot.tflite.Model;
 
 public class FileUtils {
@@ -113,27 +110,6 @@ public class FileUtils {
 
   public static boolean updateModelConfig(Activity activity, Context context , List<Model> modelList, boolean isDrive) {
     String configFile = "config.json";
-     GoogleServices googleServices= new GoogleServices(activity, context, new GoogleSignInCallback() {
-      @Override
-      public void onSignInSuccess(FirebaseUser account) {
-
-      }
-
-      @Override
-      public void onSignInFailed(Exception exception) {
-
-      }
-
-      @Override
-      public void onSignOutSuccess() {
-
-      }
-
-      @Override
-      public void onSignOutFailed(Exception exception) {
-
-      }
-    });
     try {
       Gson gson = new GsonBuilder().setPrettyPrinting().create();
       Writer writer = new FileWriter(activity.getFilesDir() + File.separator + configFile);

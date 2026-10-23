@@ -83,18 +83,6 @@
         tools:layout="@layout/fragment_logger" />
 
     <fragment
-        android:id="@+id/profileFragment"
-        android:name="org.openbot.app.robot.profile.ProfileFragment"
-        android:label="My Profile" >
-        <action
-            android:id="@+id/action_profileFragment_to_EditProfileFragment"
-            app:destination="@id/EditProfileFragment" />
-    </fragment>
-
-    <action
-        android:id="@+id/open_profile_fragment"
-        app:destination="@id/profileFragment" />
-    <fragment
         android:id="@+id/AIFragment"
         android:name="org.openbot.app.robot.autopilot.AutopilotFragment"
         android:label="fragment_ai"
@@ -127,9 +115,6 @@
         android:name="org.openbot.app.robot.projects.ProjectsFragment"
         android:label="My Projects">
         <action
-            android:id="@+id/action_projectsFragment_to_barCodeScannerFragment"
-            app:destination="@id/barCodeScannerFragment" />
-        <action
             android:id="@+id/action_projectsFragment_to_blocklyExecutingFragment"
             app:destination="@id/blocklyExecutingFragment" />
         <action
@@ -139,16 +124,6 @@
     <action
         android:id="@+id/open_projects_fragment"
         app:destination="@id/projectsFragment" />
-
-    <fragment
-        android:id="@+id/barCodeScannerFragment"
-        android:name="org.openbot.app.robot.projects.BarCodeScannerFragment"
-        android:label="barCodeScanner"
-        tools:layout="@layout/fragment_bar_code_scanner">
-        <action
-            android:id="@+id/action_barCodeScannerFragment_to_blocklyExecutingFragment"
-            app:destination="@id/blocklyExecutingFragment" />
-    </fragment>
 
     <fragment
         android:id="@+id/playGroundFragment"
@@ -162,11 +137,6 @@
         android:label="blocklyExecute"
         tools:layout="@layout/fragment_blockly_executing" />
 
-    <fragment
-        android:id="@+id/EditProfileFragment"
-        android:name="org.openbot.app.robot.profile.EditProfileFragment"
-        android:label="editProfile"
-        tools:layout="@layout/fragment_edit_profile" />
     <fragment
         android:id="@+id/robotInfoFragment"
         android:name="org.openbot.app.robot.robot.RobotInfoFragment"

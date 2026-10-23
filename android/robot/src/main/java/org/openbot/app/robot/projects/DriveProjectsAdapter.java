@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.SparseArray;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import com.google.api.client.util.DateTime;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -14,7 +13,7 @@ import org.openbot.app.robot.R;
 import org.openbot.app.robot.main.CommonRecyclerViewAdapter;
 
 /**
- * This is a custom adapter for displaying a list of files representing projects in Google Drive.
+ * This is a custom adapter for displaying the list of locally stored playground projects.
  */
 public class DriveProjectsAdapter extends CommonRecyclerViewAdapter<ProjectsDataInObject> {
 
@@ -67,8 +66,7 @@ public class DriveProjectsAdapter extends CommonRecyclerViewAdapter<ProjectsData
 
     // Format the project date according to the UI design and set the text of the updated date view
     // to the formatted date.
-    DateTime dateTime = new DateTime(String.valueOf(data.getProjectDate()));
-    Instant instant = Instant.ofEpochMilli(dateTime.getValue());
+    Instant instant = Instant.ofEpochMilli(data.getProjectDate());
     LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
     DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MMM dd, yyyy");
     String formattedDate = outputFormatter.format(localDate);

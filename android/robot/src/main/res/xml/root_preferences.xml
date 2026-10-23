@@ -89,6 +89,13 @@
         app:layout="@layout/preference_category_custom"
         app:title="@string/web_controller_category">
 
+        <EditTextPreference
+            app:iconSpaceReserved="false"
+            app:key="web_room_id"
+            app:layout="@layout/preference_icon_end"
+            app:title="@string/web_room_id"
+            app:useSimpleSummaryProvider="true" />
+
         <!-- Default IP. Replace it with your own server IP address in Settings. -->
         <EditTextPreference
             app:defaultValue="ws://192.168.1.40:8080/ws"
@@ -96,6 +103,34 @@
             app:key="web_signaling_server"
             app:layout="@layout/preference_icon_end_last"
             app:title="@string/web_signaling_server"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:layout="@layout/preference_category_custom"
+        app:title="@string/telemetry_category">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:key="telemetry_enabled"
+            app:layout="@layout/preference_icon_end"
+            app:title="@string/telemetry_enabled" />
+
+        <EditTextPreference
+            app:iconSpaceReserved="false"
+            app:key="telemetry_url"
+            app:layout="@layout/preference_icon_end"
+            app:title="@string/telemetry_url"
+            app:useSimpleSummaryProvider="true" />
+
+        <EditTextPreference
+            app:iconSpaceReserved="false"
+            app:key="telemetry_api_key"
+            app:layout="@layout/preference_icon_end_last"
+            app:title="@string/telemetry_api_key"
             app:useSimpleSummaryProvider="true" />
 
     </PreferenceCategory>

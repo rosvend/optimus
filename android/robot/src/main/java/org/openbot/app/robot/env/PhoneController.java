@@ -11,8 +11,6 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 
-import com.google.firebase.auth.FirebaseAuth;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.openbot.app.robot.R;
@@ -167,15 +165,15 @@ public class PhoneController {
     webSocket = client.newWebSocket(request, webSocketListener);
   }
 
-  // Same email on robot and browser = same room (must be signed in with Google).
+  // Both the robot and the browser must join the same room (Settings > Web Controller).
   private void sendRoomId(WebSocket socket) {
-    if (socket == null || FirebaseAuth.getInstance().getCurrentUser() == null) {
-      Timber.w("Cannot join web room: WebSocket or Firebase user is missing");
+    if (socket == null) {
+      Timber.w("Cannot join web room: WebSocket is missing");
       return;
     }
     try {
       JSONObject room = new JSONObject();
-      room.put("roomId", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+      room.put("roomId", ControllerConfig.getInstance().getWebRoomId());
       room.put("clientType", "robot");
       socket.send(room.toString());
       Timber.d("Sent web roomId for signaling");
@@ -198,9 +196,9 @@ public class PhoneController {
   }
 
   public void send(JSONObject info) {
-    if (webSocket != null && FirebaseAuth.getInstance().getCurrentUser() != null) {
+    if (webSocket != null) {
       try {
-        info.put("roomId", FirebaseAuth.getInstance().getCurrentUser().getEmail());
+        info.put("roomId", ControllerConfig.getInstance().getWebRoomId());
         webSocket.send(info.toString());
       } catch (JSONException e) {
         throw new RuntimeException(e);

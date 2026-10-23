@@ -141,8 +141,7 @@ public class MainActivity extends AppCompatActivity {
           if (destination.getId() == R.id.mainFragment
               || destination.getId() == R.id.settingsFragment
               || destination.getId() == R.id.usbFragment
-              || destination.getId() == R.id.projectsFragment
-              || destination.getId() == R.id.profileFragment) {
+              || destination.getId() == R.id.projectsFragment) {
             toolbar.setVisibility(View.VISIBLE);
             bottomNavigationView.setVisibility(View.VISIBLE);
           } else {
@@ -154,9 +153,7 @@ public class MainActivity extends AppCompatActivity {
           Menu menu = toolbar.getMenu();
           if (destination.getId() == R.id.projectsFragment) {
             menu.findItem(R.id.settingsFragment).setVisible(false);
-            menu.findItem(R.id.barCodeScannerFragment).setVisible(true);
           } else {
-            menu.findItem(R.id.barCodeScannerFragment).setVisible(false);
             if (vehicle.getConnectionType().equals("Bluetooth")) {
               menu.findItem(R.id.bluetoothFragment).setVisible(true);
             }
@@ -179,10 +176,7 @@ public class MainActivity extends AppCompatActivity {
     int currentDestinationId =
         Objects.requireNonNull(navController.getCurrentDestination()).getId();
     if (currentDestinationId == R.id.projectsFragment) {
-      menu.findItem(R.id.barCodeScannerFragment).setVisible(true);
       menu.findItem(R.id.settingsFragment).setVisible(false);
-    } else {
-      menu.findItem(R.id.barCodeScannerFragment).setVisible(false);
     }
     if (vehicle.getConnectionType().equals("Bluetooth")) {
       menu.findItem(R.id.usbFragment).setVisible(false);
@@ -197,10 +191,6 @@ public class MainActivity extends AppCompatActivity {
   @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-    if (item.getItemId() == R.id.barCodeScannerFragment) {
-      navController.navigate(R.id.barCodeScannerFragment);
-      return true;
-    }
 
     return NavigationUI.onNavDestinationSelected(item, navController)
         || super.onOptionsItemSelected(item);

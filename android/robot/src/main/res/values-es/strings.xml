@@ -133,6 +133,11 @@
     <string name="connectivity_mode">Modo de conectividad</string>
     <string name="web_controller_category">Controlador Web</string>
     <string name="web_signaling_server">Servidor de señalización web</string>
+    <string name="web_room_id">ID de sala web</string>
+    <string name="telemetry_category">Telemetría en la nube</string>
+    <string name="telemetry_enabled">Subir lecturas de sensores</string>
+    <string name="telemetry_url">URL del servidor de telemetría</string>
+    <string name="telemetry_api_key">API key de telemetría</string>
     <string name="tile_general">General</string>
     <string name="tile_ai">IA</string>
     <string name="tile_legacy">Legado</string>
@@ -153,7 +158,6 @@
     </string-array>
     <string-array name="save_data">
         <item>Local</item>
-        <item>Google Drive</item>
         <item>Servidor local</item>
     </string-array>
 
@@ -170,7 +174,7 @@
     <string name="sign_in_description">Configura tu perfil iniciando sesión con tu cuenta de Google.</string>
     <string name="sign_in_with_google">Iniciar sesión con Google</string>
     <string name="no_projects_found_title">¡Vaya! No se encontraron proyectos.</string>
-    <string name="no_projects_found_body">Parece que aún no hay proyectos en tu Google Drive.</string>
+    <string name="no_projects_found_body">Parece que aún no hay proyectos guardados.</string>
     <string name="project_file_detected">Archivo %1$s detectado. Pulsa Iniciar para ejecutar el código en tu OpenBot.</string>
     <string name="usb_check_connection">Por favor, comprueba la conexión USB.</string>
     <string name="ble_connecting">Conectando</string>

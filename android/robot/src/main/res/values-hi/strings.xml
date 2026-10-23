@@ -153,7 +153,6 @@
     </string-array>
     <string-array name="save_data">
         <item>लोकल स्टोरेज</item>
-        <item>Google Drive</item>
         <item>लोकल सर्वर</item>
     </string-array>
 
@@ -170,7 +169,7 @@
     <string name="sign_in_description">अपने Google खाते से साइन इन करके अपनी प्रोफ़ाइल सेट करें।</string>
     <string name="sign_in_with_google">Google से साइन इन करें</string>
     <string name="no_projects_found_title">अरे! कोई प्रोजेक्ट नहीं मिला।</string>
-    <string name="no_projects_found_body">ऐसा लगता है कि आपके Google Drive में अभी तक कोई प्रोजेक्ट नहीं है।</string>
+    <string name="no_projects_found_body">ऐसा लगता है कि अभी तक कोई प्रोजेक्ट सहेजा नहीं गया है।</string>
     <string name="project_file_detected">%1$s फ़ाइल मिली। अपने OpenBot पर कोड चलाने के लिए स्टार्ट दबाएं।</string>
     <string name="usb_check_connection">कृपया USB कनेक्शन जांचें।</string>
     <string name="ble_connecting">कनेक्ट हो रहा है</string>

@@ -53,6 +53,16 @@ public class Vehicle {
   private float temperature = 0f;
   private float humidity = 0f;
   private boolean hasEnvReading = false;
+  private EnvListener envListener;
+
+  /** Notified for every valid env reading received from the robot. */
+  public interface EnvListener {
+    void onEnvReading(float temperature, float humidity);
+  }
+
+  public void setEnvListener(EnvListener envListener) {
+    this.envListener = envListener;
+  }
   private boolean isReady = false;
   private BluetoothManager bluetoothManager;
   SharedPreferences sharedPreferences;
@@ -144,6 +154,9 @@ public class Vehicle {
     temperature = Float.parseFloat(parts[0]);
     humidity = Float.parseFloat(parts[1]);
     hasEnvReading = true;
+    if (envListener != null) {
+      envListener.onEnvReading(temperature, humidity);
+    }
   }
 
   public boolean isHasBumpSensor() {

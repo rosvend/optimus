@@ -95,4 +95,25 @@ public class VehicleTest {
     vehicle.processEnvMessage("23.4,61.2");
     assertTrue(vehicle.hasEnvReading());
   }
+
+  @Test
+  public void envReadingNotifiesListener() {
+    float[] received = new float[2];
+    int[] calls = new int[1];
+    vehicle.setEnvListener(
+        (temperature, humidity) -> {
+          calls[0]++;
+          received[0] = temperature;
+          received[1] = humidity;
+        });
+
+    vehicle.processEnvMessage("23.4,61.2");
+    assertEquals(1, calls[0]);
+    assertEquals(23.4f, received[0], 0.001);
+    assertEquals(61.2f, received[1], 0.001);
+
+    // Malformed bodies must not reach the listener.
+    vehicle.processEnvMessage("not,a,reading");
+    assertEquals(1, calls[0]);
+  }
 }

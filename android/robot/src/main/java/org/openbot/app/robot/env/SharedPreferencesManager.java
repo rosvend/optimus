@@ -2,8 +2,9 @@ package org.openbot.app.robot.env;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
@@ -206,12 +207,14 @@ public class SharedPreferencesManager {
     String json = preferences.getString(PROJECTS_LIST, null);
     // Define the type of the object to be deserialized
     Type type = new TypeToken<ArrayList<ProjectsDataInObject>>() {}.getType();
-    if (gson.fromJson(json, type) != null) {
-      // Deserialize the JSON string to an ArrayList<ProjectsDataInObject>
-      return gson.fromJson(json, type);
-    } else {
-      // If the JSON string is null or cannot be deserialized, return an empty ArrayList
-      return new ArrayList<>();
+    try {
+      ArrayList<ProjectsDataInObject> projects = gson.fromJson(json, type);
+      if (projects != null) {
+        return projects;
+      }
+    } catch (JsonSyntaxException e) {
+      // Projects persisted by an older app version are no longer readable; start fresh.
     }
+    return new ArrayList<>();
   }
 }

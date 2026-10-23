@@ -8,6 +8,7 @@ import static org.openbot.app.robot.utils.Constants.PERMISSION_LOCATION;
 import static org.openbot.app.robot.utils.Constants.PERMISSION_STORAGE;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,8 +19,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 import androidx.preference.SwitchPreferenceCompat;
 import java.util.Objects;
+import org.openbot.app.robot.BuildConfig;
 import org.openbot.app.robot.R;
 import org.openbot.app.robot.utils.Constants;
 import org.openbot.app.robot.utils.LanguageOption;
@@ -239,6 +242,29 @@ public class SettingsFragment extends PreferenceFragmentCompat {
             new LanguagePickerDialogFragment().show(getParentFragmentManager(), "language_picker");
             return true;
           });
+    }
+
+    seedTelemetryDefaults();
+  }
+
+  // Makes the BuildConfig telemetry defaults (telemetry.properties) visible and editable in the
+  // settings fields. Explicitly cleared values stay cleared, which disables telemetry.
+  private void seedTelemetryDefaults() {
+    SharedPreferences preferences =
+        PreferenceManager.getDefaultSharedPreferences(requireContext());
+    if (preferences.getString("telemetry_url", null) == null
+        && !BuildConfig.TELEMETRY_URL.isEmpty()) {
+      preferences.edit().putString("telemetry_url", BuildConfig.TELEMETRY_URL).apply();
+    }
+    if (preferences.getString("telemetry_api_key", null) == null
+        && !BuildConfig.TELEMETRY_API_KEY.isEmpty()) {
+      preferences.edit().putString("telemetry_api_key", BuildConfig.TELEMETRY_API_KEY).apply();
+    }
+    if (preferences.getString("web_room_id", "").trim().isEmpty()) {
+      preferences
+          .edit()
+          .putString("web_room_id", org.openbot.app.robot.env.ControllerConfig.generateRoomId())
+          .apply();
     }
   }
 

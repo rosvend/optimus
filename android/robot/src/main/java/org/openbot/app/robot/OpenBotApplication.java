@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 import org.jetbrains.annotations.NotNull;
+import org.openbot.app.robot.telemetry.TelemetryManager;
 import org.openbot.app.robot.vehicle.Vehicle;
 import timber.log.Timber;
 
@@ -28,6 +29,7 @@ public class OpenBotApplication extends Application {
     vehicle = new Vehicle(this, baudRate);
     vehicle.initBle();
     vehicle.connectUsb();
+    TelemetryManager.getInstance(this).start(vehicle);
     if (BuildConfig.DEBUG) {
       Timber.plant(
           new Timber.DebugTree() {

@@ -1,18 +1,16 @@
 package org.openbot.app.robot.projects;
 
-import com.google.api.client.util.DateTime;
-
 public class ProjectsDataInObject {
   private final String projectId;
   private final String projectName;
-  private final DateTime date;
+  private final long dateMs;
   private final String projectCommands;
 
   public ProjectsDataInObject(
-      String projectId, String projectName, DateTime date, String projectCommands) {
+      String projectId, String projectName, long dateMs, String projectCommands) {
     this.projectId = projectId;
     this.projectName = projectName;
-    this.date = date;
+    this.dateMs = dateMs;
     this.projectCommands = projectCommands;
   }
 
@@ -24,8 +22,8 @@ public class ProjectsDataInObject {
     return projectName;
   }
 
-  public DateTime getProjectDate() {
-    return date;
+  public long getProjectDate() {
+    return dateMs;
   }
 
   public String getProjectCommands() {

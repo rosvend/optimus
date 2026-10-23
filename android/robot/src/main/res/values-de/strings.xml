@@ -153,7 +153,6 @@
     </string-array>
     <string-array name="save_data">
         <item>Lokal</item>
-        <item>Google Drive</item>
         <item>Lokaler Server</item>
     </string-array>
 
@@ -170,7 +169,7 @@
     <string name="sign_in_description">Richten Sie Ihr Profil ein, indem Sie sich mit Ihrem Google-Konto anmelden.</string>
     <string name="sign_in_with_google">Mit Google anmelden</string>
     <string name="no_projects_found_title">Hoppla! Keine Projekte gefunden.</string>
-    <string name="no_projects_found_body">Es sieht so aus, als gäbe es noch keine Projekte in Ihrem Google Drive.</string>
+    <string name="no_projects_found_body">Es sieht so aus, als gäbe es noch keine gespeicherten Projekte.</string>
     <string name="project_file_detected">%1$s-Datei erkannt. Drücken Sie Start, um den Code auf Ihrem OpenBot auszuführen.</string>
     <string name="usb_check_connection">Bitte überprüfen Sie die USB-Verbindung.</string>
     <string name="ble_connecting">Verbinde …</string>

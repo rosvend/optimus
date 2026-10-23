@@ -1,6 +1,5 @@
 package org.openbot.app.robot.modelManagement;
 
-import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -10,15 +9,11 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
-import android.net.http.SslCertificate;
 import android.os.Bundle;
-import android.os.Environment;
-import android.os.Handler;
 import android.provider.OpenableColumns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -32,9 +27,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import org.openbot.app.robot.googleServices.GoogleServices;
-
-import com.google.firebase.auth.FirebaseUser;
 import com.google.gson.Gson;
 import com.nononsenseapps.filepicker.Utils;
 import java.io.File;
@@ -46,9 +38,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.openbot.app.robot.R;
 import org.openbot.app.robot.databinding.FragmentModelManagementBinding;
-import org.openbot.app.robot.googleServices.GoogleServices;
 import org.openbot.app.robot.main.OnItemClickListener;
-import org.openbot.app.robot.projects.GoogleSignInCallback;
 import org.openbot.app.robot.tflite.Model;
 import org.openbot.app.robot.utils.Constants;
 import org.openbot.app.robot.utils.FileUtils;
@@ -66,32 +56,9 @@ public class ModelManagementFragment extends Fragment
     private OnBackPressedCallback onBackPressedCallback;
     private boolean isDownloading = false;
 
-    private GoogleServices googleServices;
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        googleServices = new GoogleServices(requireActivity(), requireContext(), new GoogleSignInCallback() {
-            @Override
-            public void onSignInSuccess(FirebaseUser account) {
-
-            }
-
-            @Override
-            public void onSignInFailed(Exception exception) {
-
-            }
-
-            @Override
-            public void onSignOutSuccess() {
-
-            }
-
-            @Override
-            public void onSignOutFailed(Exception exception) {
-
-            }
-        });
         mStartForResult =
                 registerForActivityResult(
                         new ActivityResultContracts.StartActivityForResult(),
@@ -207,7 +174,6 @@ public class ModelManagementFragment extends Fragment
                             masterList.add(item1);
                             showModels(loadModelList(binding.modelSpinner.getSelectedItem().toString()));
                             FileUtils.updateModelConfig(requireActivity(), requireContext(), masterList, false);
-                            googleServices.createAndUploadJsonFile(masterList);
                             Gson gson = new Gson();
                             String json = gson.toJson(masterList);
                             System.out.println("filenameId:::"+masterList.indexOf(item1));
@@ -225,7 +191,6 @@ public class ModelManagementFragment extends Fragment
         intent.setType("application/octet-stream"); // Specify the MIME type for TFLite files
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         mStartForResult.launch(intent);
-        googleServices.createAndUploadJsonFile(masterList);
     }
 
     @Nullable
@@ -243,35 +208,9 @@ public class ModelManagementFragment extends Fragment
         super.onViewCreated(view, savedInstanceState);
         masterList = FileUtils.loadConfigJSONFromAsset(requireActivity());
 
-       // load all model first
-        GoogleServices googleServices = new GoogleServices(requireActivity(), requireContext(), new GoogleSignInCallback() {
-            @Override
-            public void onSignInSuccess(FirebaseUser account) {
-
-            }
-
-            @Override
-            public void onSignInFailed(Exception exception) {
-
-            }
-
-            @Override
-            public void onSignOutSuccess() {
-
-            }
-
-            @Override
-            public void onSignOutFailed(Exception exception) {
-
-            }
-        });
         List<String> modelTypes =
                 Arrays.stream(Model.TYPE.values()).map(Enum::toString).collect(Collectors.toList());
         modelTypes.add(0, ALL);
-        ObjectAnimator rotation = ObjectAnimator.ofFloat(binding.autoSync, "rotation", 360f, 0f);
-        rotation.setDuration(1000);
-        rotation.setRepeatCount(ObjectAnimator.INFINITE);
-        rotation.setInterpolator(new LinearInterpolator());
 
         ArrayAdapter<String> modelAdapter =
 
@@ -279,10 +218,6 @@ public class ModelManagementFragment extends Fragment
                         requireContext(), android.R.layout.simple_dropdown_item_1line, modelTypes);
 
         binding.modelSpinner.setAdapter(modelAdapter);
-        binding.autoSync.setOnClickListener(v -> {
-            rotation.start();
-            googleServices.getConfigFileContent(rotation, binding.autoSync, adapter);
-        });
         adapter = new ModelAdapter(loadModelList(ALL), requireContext(), this);
 
         binding.modelListContainer.setLayoutManager(new LinearLayoutManager(requireContext()));
@@ -389,7 +324,6 @@ public class ModelManagementFragment extends Fragment
                     model.setPathType(Model.PATH_TYPE.FILE);
                     FileUtils.updateModelConfig(requireActivity(), requireContext(), masterList, false);
                     //adapter.notifyDataSetChanged();
-                    googleServices.createAndUploadJsonFile(masterList);
                     break;
                 }
             }
@@ -421,7 +355,6 @@ public class ModelManagementFragment extends Fragment
                     }
                     FileUtils.updateModelConfig(requireActivity(), requireContext(), masterList, false);
                     requireActivity().runOnUiThread(() -> adapter.setItems(loadModelList(binding.modelSpinner.getSelectedItem().toString())));
-                    googleServices.createAndUploadJsonFile(masterList);
                 });
         builder.setNegativeButton("Cancel", (dialog, id) -> {
         });

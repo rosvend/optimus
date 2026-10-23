@@ -75,4 +75,28 @@ public class ControllerConfig {
   public void setWebSignalingServerUrl(String url) {
     set("web_signaling_server", url);
   }
+
+  /**
+   * Room id that pairs the robot with a browser over the web signaling server. Generated once on
+   * first use; the browser must join the same room. Shown in Settings under Web Controller.
+   */
+  public String getWebRoomId() {
+    String roomId = get("web_room_id", "");
+    if (roomId.trim().isEmpty()) {
+      roomId = generateRoomId();
+      set("web_room_id", roomId);
+    }
+    return roomId;
+  }
+
+  public static String generateRoomId() {
+    // Unambiguous uppercase alphabet, easy to read and type on another device.
+    String alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    java.util.Random random = new java.util.Random();
+    StringBuilder id = new StringBuilder(6);
+    for (int i = 0; i < 6; i++) {
+      id.append(alphabet.charAt(random.nextInt(alphabet.length())));
+    }
+    return id.toString();
+  }
 }

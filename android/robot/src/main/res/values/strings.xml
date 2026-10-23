@@ -152,7 +152,6 @@
 
     <string-array name="save_data">
         <item>Local Storage</item>
-        <item>Google Drive</item>
         <item>Local Server</item>
     </string-array>
 
@@ -225,6 +224,11 @@
     <string name="connectivity_mode">Connectivity Mode</string>
     <string name="web_controller_category">Web Controller</string>
     <string name="web_signaling_server">Web Signaling Server</string>
+    <string name="web_room_id">Web Room ID</string>
+    <string name="telemetry_category">Cloud Telemetry</string>
+    <string name="telemetry_enabled">Upload Sensor Readings</string>
+    <string name="telemetry_url">Telemetry Server URL</string>
+    <string name="telemetry_api_key">Telemetry API Key</string>
     <string name="tile_general">General</string>
     <string name="tile_ai">AI</string>
     <string name="tile_legacy">Legacy</string>
@@ -251,7 +255,7 @@
     <string name="sign_in_description">Set up your profile by signing in with your Google account.</string>
     <string name="sign_in_with_google">Sign-in with Google</string>
     <string name="no_projects_found_title">Oops! No projects found.</string>
-    <string name="no_projects_found_body">Looks like there are no projects in your google drive yet.</string>
+    <string name="no_projects_found_body">Looks like there are no saved projects yet.</string>
     <string name="project_file_detected">%1$s file detected. Start to execute the code on your OpenBot.</string>
     <string name="usb_check_connection">Please check the USB connection.</string>
     <string name="ble_connecting">Connecting</string>

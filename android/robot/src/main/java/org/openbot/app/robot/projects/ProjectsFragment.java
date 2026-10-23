@@ -1,37 +1,31 @@
 package org.openbot.app.robot.projects;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import java.util.List;
+import java.util.ArrayList;
 import org.openbot.app.robot.R;
 import org.openbot.app.robot.databinding.FragmentProjectsBinding;
 import org.openbot.app.robot.env.SharedPreferencesManager;
-import org.openbot.app.robot.googleServices.GoogleServices;
 import org.openbot.app.robot.main.CommonRecyclerViewAdapter;
 import org.openbot.app.robot.utils.BotFunctionUtils;
 
+/**
+ * Shows the locally stored playground projects. Tapping one asks for confirmation and hands its
+ * JavaScript to {@link BlocklyExecutingFragment} through its static {@code finalCode} holder.
+ */
 public class ProjectsFragment extends Fragment {
   private FragmentProjectsBinding binding;
-  private GoogleServices googleServices;
   private DriveProjectsAdapter adapter;
-  private BarCodeScannerFragment barCodeScannerFragment;
+  private ArrayList<ProjectsDataInObject> projectsList;
   private BottomSheetBehavior projectsBottomSheetBehavior;
   private final SparseArray<int[]> driveRes = new SparseArray<>();
   private SharedPreferencesManager sharedPreferencesManager;
@@ -42,7 +36,6 @@ public class ProjectsFragment extends Fragment {
     // Inflate the layout for this fragment
     binding = FragmentProjectsBinding.inflate(inflater, container, false);
     sharedPreferencesManager = new SharedPreferencesManager(requireContext());
-    googleServices = new GoogleServices(requireActivity(), requireContext(), newGoogleServices);
     projectsBottomSheetBehavior = BottomSheetBehavior.from(binding.projectsBottomSheet);
     projectsBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     return binding.getRoot();
@@ -51,8 +44,6 @@ public class ProjectsFragment extends Fragment {
   @Override
   public void onViewCreated(@NonNull View view, @NonNull Bundle savedInstanceState) {
     super.onViewCreated(view, savedInstanceState);
-    barCodeScannerFragment = new BarCodeScannerFragment();
-    binding.signInButton.setOnClickListener(v -> signIn());
     projectsBottomSheetBehavior.addBottomSheetCallback(dpBottomSheetCallback);
     requireView()
         .findViewById(R.id.dp_start_btn)
@@ -65,74 +56,36 @@ public class ProjectsFragment extends Fragment {
         .setOnClickListener(
             v -> projectsBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN));
 
-    if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-      binding.signOutLayout.setVisibility(View.GONE);
-      showProjectsRv();
-    } else {
-      binding.signOutLayout.setVisibility(View.VISIBLE);
-    }
-
     binding.refreshLayout.setOnRefreshListener(this::showProjectsRv);
+    showProjectsRv();
   }
-
-  private void signIn() {
-    Intent signInIntent = googleServices.mGoogleSignInClient.getSignInIntent();
-    googleLogInActivityResultLauncher.launch(signInIntent);
-  }
-
-  ActivityResultLauncher<Intent> googleLogInActivityResultLauncher =
-      registerForActivityResult(
-          new ActivityResultContracts.StartActivityForResult(),
-          result -> {
-            Intent data = result.getData();
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            googleServices.handleSignInResult(task);
-            if (task.isSuccessful()) {
-              binding.signOutLayout.setVisibility(View.GONE);
-              showProjectsRv();
-            }
-          });
-
-  private final GoogleSignInCallback newGoogleServices =
-      new GoogleSignInCallback() {
-        @Override
-        public void onSignInSuccess(FirebaseUser account) {}
-
-        @Override
-        public void onSignInFailed(Exception exception) {}
-
-        @Override
-        public void onSignOutSuccess() {}
-
-        @Override
-        public void onSignOutFailed(Exception exception) {}
-      };
 
   private void showProjectsRv() {
     binding.noProjectsLayout.setVisibility(View.GONE);
     binding.refreshLayout.setVisibility(View.VISIBLE);
-    googleServices.projectsList = sharedPreferencesManager.getProjectList();
+    projectsList = sharedPreferencesManager.getProjectList();
     // Set Grid layout according to screen width dimension.
     int screenWidth = getResources().getDisplayMetrics().widthPixels;
     int itemWidth = getResources().getDimensionPixelSize(R.dimen.project_card_view);
     int numColumns = screenWidth / itemWidth;
     binding.projectsRv.setLayoutManager(new GridLayoutManager(requireActivity(), numColumns));
     driveRes.put(R.layout.projects_list_view, new int[] {R.id.project_name, R.id.project_date});
-//    System.out.println("msg"+R.layout.projects_list_view+" "+R.id.project_name);
     setScanDeviceAdapter(
-        new DriveProjectsAdapter(requireActivity(), googleServices.projectsList, driveRes),
+        new DriveProjectsAdapter(requireActivity(), projectsList, driveRes),
         (itemView, position) ->
             onTapProjectItem(
-                googleServices.projectsList.get(position).getProjectCommands(),
-                googleServices.projectsList.get(position).getProjectName()),
+                projectsList.get(position).getProjectCommands(),
+                projectsList.get(position).getProjectName()),
         ((itemView, position) ->
             onLongTapProjectItem(
-                googleServices.projectsList.get(position).getProjectName(),
-                googleServices.projectsList.get(position).getProjectId())));
-    binding.projectsLoader.setVisibility(View.VISIBLE);
-    googleServices.accessDriveFiles(adapter, binding);
-    System.out.println("print"+googleServices.projectsList);
+                projectsList.get(position).getProjectName(),
+                projectsList.get(position).getProjectId())));
+    binding.projectsLoader.setVisibility(View.GONE);
+    binding.refreshLayout.setRefreshing(false);
     binding.projectsRv.setAdapter(adapter);
+    if (projectsList.isEmpty()) {
+      binding.noProjectsLayout.setVisibility(View.VISIBLE);
+    }
   }
 
   private void setScanDeviceAdapter(
@@ -142,16 +95,6 @@ public class ProjectsFragment extends Fragment {
     this.adapter = adapter;
     adapter.setOnItemClickListener(onItemClickListener);
     adapter.setOnItemLongClickListener(onItemLongClickListener);
-  }
-
-  /** update projects screen when there is 0 projects on google drive account. */
-  public void updateMessage(
-      List<ProjectsDataInObject> driveFiles, FragmentProjectsBinding binding) {
-    binding.projectsLoader.setVisibility(View.GONE);
-    binding.refreshLayout.setRefreshing(false);
-    if (driveFiles.size() <= 0) {
-      binding.noProjectsLayout.setVisibility(View.VISIBLE);
-    }
   }
 
   /**
@@ -167,7 +110,7 @@ public class ProjectsFragment extends Fragment {
         code = code.replace(fun, "Android." + fun);
       }
     }
-    barCodeScannerFragment.finalCode = code;
+    BlocklyExecutingFragment.finalCode = code;
     binding.dpMessage.setText(
         getString(R.string.project_file_detected, projectName.replace(".js", "")));
     projectsBottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
@@ -175,20 +118,24 @@ public class ProjectsFragment extends Fragment {
 
   /**
    * This method is triggered when a long tap is performed on a project item. It displays an
-   * AlertDialog with a confirmation message to delete the project.
+   * AlertDialog with a confirmation message to delete the project from the local list.
    *
    * @param projectName
    * @param projectId
    */
   private void onLongTapProjectItem(String projectName, String projectId) {
     AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-    builder.setTitle("Delete this file ?").setMessage("You cannot restore this file later.");
+    builder.setTitle("Delete this project ?").setMessage("You cannot restore this project later.");
     builder.setPositiveButton(
         "Delete",
         (dialog, id) -> {
-          // Perform the file deletion using googleServices.deleteFile() method
-          googleServices.deleteFile(projectId, projectName, adapter, binding);
-          binding.projectsLoader.setVisibility(View.VISIBLE);
+          for (int i = projectsList.size() - 1; i >= 0; i--) {
+            if (projectsList.get(i).getProjectId().equals(projectId)) {
+              projectsList.remove(i);
+            }
+          }
+          sharedPreferencesManager.setProjectLIst(projectsList);
+          showProjectsRv();
         });
     builder.setNegativeButton("Cancel", (dialog, id) -> dialog.cancel());
     AlertDialog dialog = builder.create();
@@ -214,7 +161,7 @@ public class ProjectsFragment extends Fragment {
 
         @Override
         public void onSlide(@NonNull View bottomSheet, float slideOffset) {
-          // Handle sliding events here
+          // Handle sliding state changes here
         }
       };
 
