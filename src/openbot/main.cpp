@@ -178,8 +178,6 @@ void loop() {
   updateSonar(now);
   updateEnv(now);
 
-  leftMotor.drive(leftRamp.update(LOOP_MS));
-  rightMotor.drive(rightRamp.update(LOOP_MS));
   unsigned long elapsedMs = now - lastLoopMs;
   lastLoopMs = now;
 
