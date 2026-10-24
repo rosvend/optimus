@@ -49,6 +49,7 @@ Message OpenBotParser::parse() const {
       return {MessageType::Heartbeat, 0, 0, interval};
     }
     case 'f': return {MessageType::Feature, 0, 0, 0};
+    case 's': return {MessageType::SonarInterval, 0, 0, atol(body)};
     default: return NO_MESSAGE;
   }
 }

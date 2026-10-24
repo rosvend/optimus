@@ -1,10 +1,11 @@
+#include "openbot_parser.h"
 #include <string.h>
 #include <unity.h>
-#include "openbot_parser.h"
 
 Message feedLine(OpenBotParser &parser, const char *line) {
   Message last = {MessageType::None, 0, 0, 0};
-  for (const char *c = line; *c; c++) last = parser.feed(*c);
+  for (const char *c = line; *c; c++)
+    last = parser.feed(*c);
   return last;
 }
 
@@ -67,11 +68,27 @@ void test_oversized_line_is_dropped_then_recovers() {
   TEST_ASSERT_EQUAL(MessageType::Control, (int)feedLine(parser, "c5,6\n").type);
 }
 
+void test_sonar_interval_message() {
+  OpenBotParser parser;
+  Message m = feedLine(parser, "s100\n");
+  TEST_ASSERT_EQUAL(MessageType::SonarInterval, (int)m.type);
+  TEST_ASSERT_EQUAL(100, m.intervalMs);
+}
+
+void test_sonar_interval_zero_is_parsed() {
+  OpenBotParser parser;
+  Message m = feedLine(parser, "s0\n");
+  TEST_ASSERT_EQUAL(MessageType::SonarInterval, (int)m.type);
+  TEST_ASSERT_EQUAL(0, m.intervalMs);
+}
+
 void test_control_rejects_garbage_numbers() {
-  const char *lines[] = {"c,5\n", "cab,5\n", "c5,\n", "c5,6x\n", "c5x,6\n", "c5;6\n"};
+  const char *lines[] = {"c,5\n",   "cab,5\n", "c5,\n",
+                         "c5,6x\n", "c5x,6\n", "c5;6\n"};
   for (const char *line : lines) {
     OpenBotParser parser;
-    TEST_ASSERT_EQUAL_MESSAGE(MessageType::None, (int)feedLine(parser, line).type, line);
+    TEST_ASSERT_EQUAL_MESSAGE(MessageType::None,
+                              (int)feedLine(parser, line).type, line);
   }
 }
 
@@ -79,7 +96,8 @@ void test_control_rejects_out_of_range_targets() {
   const char *lines[] = {"c256,0\n", "c0,-256\n", "c999,999\n"};
   for (const char *line : lines) {
     OpenBotParser parser;
-    TEST_ASSERT_EQUAL_MESSAGE(MessageType::None, (int)feedLine(parser, line).type, line);
+    TEST_ASSERT_EQUAL_MESSAGE(MessageType::None,
+                              (int)feedLine(parser, line).type, line);
   }
 }
 
@@ -95,7 +113,8 @@ void test_heartbeat_rejects_bad_intervals() {
   const char *lines[] = {"hx\n", "h-5\n", "h250x\n", "h\n"};
   for (const char *line : lines) {
     OpenBotParser parser;
-    TEST_ASSERT_EQUAL_MESSAGE(MessageType::None, (int)feedLine(parser, line).type, line);
+    TEST_ASSERT_EQUAL_MESSAGE(MessageType::None,
+                              (int)feedLine(parser, line).type, line);
   }
 }
 
@@ -110,6 +129,8 @@ int main() {
   RUN_TEST(test_malformed_control_is_ignored);
   RUN_TEST(test_parser_recovers_after_bad_line);
   RUN_TEST(test_oversized_line_is_dropped_then_recovers);
+  RUN_TEST(test_sonar_interval_message);
+  RUN_TEST(test_sonar_interval_zero_is_parsed);
   RUN_TEST(test_control_rejects_garbage_numbers);
   RUN_TEST(test_control_rejects_out_of_range_targets);
   RUN_TEST(test_control_accepts_full_range);

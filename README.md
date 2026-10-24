@@ -42,4 +42,6 @@ pio run -e atoms3 -t upload           # keyboard control over serial (w/s/a/d, s
 
 Sensor readings (temperature, humidity, GPS) go to a serverless API on AWS. See the [infra guide](infra/README.md) for the upload format and deployment.
 
+The Android app is the uploader: it parses the `e<temperature>,<humidity>` serial lines from the board, tags them with the phone GPS position, and POSTs batches to the ingest API every 15 s. Readings are buffered while offline and sent with `age_ms`, so the server keeps their real capture time. To configure the endpoint, copy `android/robot/telemetry.properties.example` to `android/robot/telemetry.properties` (gitignored) and set `TELEMETRY_URL` / `TELEMETRY_API_KEY`, or edit the values in the app's settings (Cloud Telemetry).
+
 A live [dashboard](dashboard/README.md) shows the latest readings, a chart per sensor and the robot's position on a map.

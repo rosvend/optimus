@@ -24,7 +24,7 @@ void handleKey(char key) {
 
 void setup() {
   Serial.begin(SERIAL_BAUD);
-  pinMode(STOP_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(STOP_BUTTON_PIN, INPUT);  // GPIO 38 has no internal pull-up; the board has one
   leftMotor.drive(0);
   rightMotor.drive(0);
   Serial.println("w/s = forward/backward, a/d = spin left/right, space/x/button = stop");
