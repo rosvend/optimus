@@ -1,9 +1,11 @@
 # Optimus telemetry infra
 
-A public HTTPS endpoint where the car uploads temperature, humidity and GPS readings, and where anyone with the API key can read them back.
+A public HTTPS endpoint where the car uploads temperature, humidity and GPS readings, and where anyone with the API key can read them back. The [dashboard](../dashboard/README.md) is a static site in S3 that reads them.
 
 ```
 car / script ──HTTPS + x-api-key──▶ Lambda Function URL ──▶ Lambda (Python) ──▶ DynamoDB (optimus-telemetry)
+                                            ▲
+browser ──▶ S3 static site (dashboard) ─────┘ GET with x-api-key
 ```
 
 Everything is serverless, so there is nothing to start each AWS Academy session. The URL keeps answering between sessions.
@@ -74,15 +76,18 @@ curl "$URL?sensor=gps&from=2026-10-14T00:00:00Z&limit=20" -H "x-api-key: $KEY"
 You need Terraform ≥ 1.6, and the `academy` AWS profile with fresh credentials from the Learner Lab "AWS Details" panel.
 
 ```bash
+(cd dashboard && npm ci && npm run build)   # the dashboard is uploaded from dashboard/dist
 cd infra
 terraform init
 terraform apply
 terraform output -raw ingest_url
+terraform output -raw dashboard_url
 terraform output -raw api_key        # share privately with the team
 ```
 
 - **Settings:** all tunables live in `terraform.tfvars` (Terraform) and `lambda/config.py` (API limits and ranges).
 - **State:** the Terraform state is local and gitignored, so deploy from the same machine. Re-running `apply` keeps the same URL and key.
+- **Dashboard:** rebuild it before `apply` whenever its code changes. Terraform writes the API URL into its `config.json`. The API allows browser calls from the origins in `cors_allow_origins`.
 - **Teardown:** `terraform destroy` removes everything, including the data.
 
 ## Layout
@@ -92,7 +97,8 @@ infra/
 ├── main.tf, variables.tf, terraform.tfvars, outputs.tf   # root: wires the modules together
 ├── modules/
 │   ├── dynamodb/   # readings table
-│   └── lambda/     # function, public URL, log group
+│   ├── lambda/     # function, public URL, log group
+│   └── dashboard/  # public S3 website for the dashboard
 └── lambda/         # Python source for the function, with tests
 ```
 

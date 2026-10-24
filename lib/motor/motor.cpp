@@ -1,8 +1,10 @@
 #include "motor.h"
 #include <Arduino.h>
 
-Motor::Motor(int forwardPin, int backwardPin)
-    : forwardPin_(forwardPin), backwardPin_(backwardPin) {}
+// A reversed motor just swaps its pins, same as swapping the wires on the L298N
+Motor::Motor(int forwardPin, int backwardPin, bool reversed)
+    : forwardPin_(reversed ? backwardPin : forwardPin),
+      backwardPin_(reversed ? forwardPin : backwardPin) {}
 
 void Motor::drive(int speed) {
   int duty = abs(speed);

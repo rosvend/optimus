@@ -35,4 +35,12 @@ resource "aws_lambda_function" "function" {
 resource "aws_lambda_function_url" "function" {
   function_name      = aws_lambda_function.function.function_name
   authorization_type = "NONE"
+
+  # Lets the browser dashboard call the API; auth is the x-api-key header, not cookies
+  cors {
+    allow_origins = var.cors_allow_origins
+    allow_methods = ["GET", "POST"]
+    allow_headers = ["content-type", "x-api-key"]
+    max_age       = 3600
+  }
 }

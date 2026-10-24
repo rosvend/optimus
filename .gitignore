@@ -74,6 +74,9 @@ Testing/
 .vscode/launch.json
 .vscode/ipch
 .vscode/
+# Local AI tooling docs (not versioned)
+CLAUDE.md
+docs/superpowers/
 # Terraform
 .terraform/
 *.tfstate

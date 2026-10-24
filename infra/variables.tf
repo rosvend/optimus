@@ -47,3 +47,8 @@ variable "api_key_length" {
   description = "Length of the generated shared API key"
   type        = number
 }
+
+variable "cors_allow_origins" {
+  description = "Browser origins allowed to call the API (the dashboard)"
+  type        = list(string)
+}

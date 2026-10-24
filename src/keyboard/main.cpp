@@ -6,8 +6,8 @@
 #include "motor.h"
 #include "ramp.h"
 
-Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACKWARD_PIN);
-Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACKWARD_PIN);
+Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACKWARD_PIN, LEFT_MOTOR_REVERSED);
+Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACKWARD_PIN, RIGHT_MOTOR_REVERSED);
 SpeedRamp leftRamp(ACCEL_PER_SECOND, REVERSE_PAUSE_MS);
 SpeedRamp rightRamp(ACCEL_PER_SECOND, REVERSE_PAUSE_MS);
 Targets targets = {0, 0};
@@ -24,7 +24,7 @@ void handleKey(char key) {
 
 void setup() {
   Serial.begin(SERIAL_BAUD);
-  pinMode(STOP_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(STOP_BUTTON_PIN, INPUT);  // GPIO 38 has no internal pull-up; the board has one
   leftMotor.drive(0);
   rightMotor.drive(0);
   Serial.println("w/s = forward/backward, a/d = spin left/right, space/x/button = stop");

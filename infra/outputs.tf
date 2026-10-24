@@ -13,3 +13,8 @@ output "table_name" {
   description = "DynamoDB table holding the readings"
   value       = module.dynamodb.table_name
 }
+
+output "dashboard_url" {
+  description = "Public URL of the telemetry dashboard"
+  value       = module.dashboard.url
+}

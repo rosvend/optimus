@@ -1,0 +1,87 @@
+import { fetchTelemetry, loadApiUrl, UnauthorizedError, type Telemetry } from "./api";
+import { API_KEY_STORAGE, DEFAULT_RANGE_MINUTES, POLL_INTERVAL_MS, STALE_AFTER_MS } from "./config";
+import { formatAge } from "./format";
+import { createLineChart } from "./ui/lineChart";
+import { askForApiKey } from "./ui/login";
+import { createRobotMap } from "./ui/map";
+import { renderRanges } from "./ui/ranges";
+import { setStatus } from "./ui/status";
+import { latestTimestamp, renderTiles } from "./ui/tiles";
+
+const temperatureChart = createLineChart(document.querySelector("#chart-temperature")!, "°C");
+const humidityChart = createLineChart(document.querySelector("#chart-humidity")!, "%");
+const robotMap = createRobotMap(document.querySelector("#map")!, document.querySelector("#recenter")!);
+
+let rangeMinutes = DEFAULT_RANGE_MINUTES;
+let apiUrl = "";
+let apiKey = readStoredKey();
+let requestId = 0;
+let timer: number | undefined;
+
+renderRanges(document.querySelector("#ranges")!, rangeMinutes, (minutes) => {
+  rangeMinutes = minutes;
+  refresh();
+});
+
+async function start(): Promise<void> {
+  try {
+    apiUrl = await loadApiUrl();
+  } catch {
+    setStatus("offline", "Missing config.json");
+    return;
+  }
+  if (!apiKey) await login();
+  refresh();
+}
+
+async function refresh(): Promise<void> {
+  window.clearTimeout(timer);
+  const id = ++requestId;
+  const to = Date.now();
+  const from = to - rangeMinutes * 60_000;
+  try {
+    const data = await fetchTelemetry(apiUrl, apiKey, new Date(from));
+    if (id !== requestId) return;
+    render(data, from, to);
+  } catch (error) {
+    if (id !== requestId) return;
+    if (error instanceof UnauthorizedError) {
+      await login("That API key was rejected. Try again.");
+      return refresh();
+    } else {
+      setStatus("offline", "Can't reach the API");
+    }
+  }
+  timer = window.setTimeout(refresh, POLL_INTERVAL_MS);
+}
+
+function render(data: Telemetry, from: number, to: number): void {
+  temperatureChart.update(data.temperature, from, to);
+  humidityChart.update(data.humidity, from, to);
+  robotMap.update(data.gps);
+  renderTiles(data, to);
+
+  const last = latestTimestamp(data);
+  if (last === undefined) setStatus("stale", "No data in range");
+  else if (to - last > STALE_AFTER_MS) setStatus("stale", `Stale · ${formatAge(to - last)}`);
+  else setStatus("live", "Live");
+}
+
+async function login(message?: string): Promise<void> {
+  apiKey = await askForApiKey(message);
+  try {
+    localStorage.setItem(API_KEY_STORAGE, apiKey);
+  } catch {
+    // Private mode: the key just won't survive a reload
+  }
+}
+
+function readStoredKey(): string {
+  try {
+    return localStorage.getItem(API_KEY_STORAGE) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+start();
