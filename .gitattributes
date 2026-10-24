@@ -1,2 +1,8 @@
 # Copied OpenBot app (see android/UPSTREAM.md); keeps it out of GitHub language stats
 android/** linguist-vendored
+
+# The dashboard only views telemetry; the firmware is the core, so keep it out of language stats
+dashboard/** linguist-detectable=false
+
+# Firmware headers are C++, not C
+*.h linguist-language=C++
