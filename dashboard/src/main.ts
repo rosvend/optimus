@@ -5,12 +5,17 @@ import { createLineChart } from "./ui/lineChart";
 import { askForApiKey } from "./ui/login";
 import { createRobotMap } from "./ui/map";
 import { renderRanges } from "./ui/ranges";
-import { setStatus } from "./ui/status";
+import { createRobotElement, moodFor, setMood, useRobotFavicon } from "./ui/robot";
+import { setStatus as setStatusLabel, type StatusKind } from "./ui/status";
 import { latestTimestamp, renderTiles } from "./ui/tiles";
 
-const temperatureChart = createLineChart(document.querySelector("#chart-temperature")!, "°C");
-const humidityChart = createLineChart(document.querySelector("#chart-humidity")!, "%");
-const robotMap = createRobotMap(document.querySelector("#map")!, document.querySelector("#recenter")!);
+useRobotFavicon();
+document.querySelector("#avatar")!.append(createRobotElement("robot-avatar"));
+document.querySelector("#login-avatar")!.append(createRobotElement("robot-avatar"));
+
+const temperatureChart = createLineChart(document.querySelector("#chart-temperature")!, "°C", "temperature");
+const humidityChart = createLineChart(document.querySelector("#chart-humidity")!, "%", "humidity");
+const robotMap = createRobotMap(document.querySelector("#map")!, document.querySelector("#follow")!, document.querySelector("#view")!);
 
 let rangeMinutes = DEFAULT_RANGE_MINUTES;
 let apiUrl = "";
@@ -65,6 +70,11 @@ function render(data: Telemetry, from: number, to: number): void {
   if (last === undefined) setStatus("stale", "No data in range");
   else if (to - last > STALE_AFTER_MS) setStatus("stale", `Stale · ${formatAge(to - last)}`);
   else setStatus("live", "Live");
+}
+
+function setStatus(kind: StatusKind, text: string): void {
+  setStatusLabel(kind, text);
+  setMood(moodFor(kind));
 }
 
 async function login(message?: string): Promise<void> {

@@ -12,11 +12,25 @@ export const TIME_RANGES = [
 ] as const;
 export const DEFAULT_RANGE_MINUTES = 60;
 
-export const MAP_TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
-export const MAP_ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-export const MAP_DEFAULT_CENTER: [number, number] = [6.2442, -75.5812];
-export const MAP_DEFAULT_ZOOM = 13;
-export const MAP_FOLLOW_ZOOM = 17;
+// The robot never leaves the UPB Laureles campus, so the map is locked around it
+export const CAMPUS_CENTER: [number, number] = [-75.59, 6.2418]; // lon, lat
+// About 400 m of margin around the campus (OSM bbox 6.2398..6.2444, -75.5917..-75.5863)
+export const CAMPUS_BOUNDS: [[number, number], [number, number]] = [
+  [-75.5965, 6.2365],
+  [-75.5815, 6.2477],
+];
+export const MAP_ZOOM = 17;
+export const MAP_MIN_ZOOM = 15.5;
+export const MAP_MAX_ZOOM = 20;
+
+export const BASEMAP_STYLE_LIGHT = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+export const BASEMAP_STYLE_DARK = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+export const BASEMAP_SOURCE = "protomaps";
+export const BUILDINGS_SOURCE_LAYER = "buildings";
+// Most campus buildings have no height in OpenStreetMap; assume three floors
+export const DEFAULT_BUILDING_HEIGHT_M = 10;
+export const VIEW_3D = { pitch: 58, bearing: -24 };
+export const START_IN_3D = true;
 
 export const API_KEY_STORAGE = "optimus.apiKey";
 export const RUNTIME_CONFIG_PATH = "config.json";

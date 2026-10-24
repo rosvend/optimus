@@ -12,3 +12,13 @@ variable "api_url" {
   description = "Telemetry API URL written into config.json"
   type        = string
 }
+
+variable "aws_profile" {
+  description = "AWS CLI profile used to create the bucket"
+  type        = string
+}
+
+variable "aws_region" {
+  description = "Region the bucket is created in"
+  type        = string
+}

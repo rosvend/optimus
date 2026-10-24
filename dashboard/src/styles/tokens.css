@@ -1,0 +1,81 @@
+/* Design tokens: cool neutrals for the chrome, Optimus orange for the robot and its trail. */
+:root {
+  color-scheme: light;
+  --paper: #eef1ef;
+  --panel: rgb(248 250 249 / 0.9);
+  --surface: #f8faf9;
+  --ink: #17222e;
+  --ink-2: #4f5b67;
+  --ink-3: #6b7681;
+  --rule: rgb(23 34 46 / 0.1);
+  --rule-strong: rgb(23 34 46 / 0.2);
+  --grid: rgb(23 34 46 / 0.07);
+  --axis: rgb(23 34 46 / 0.2);
+  --accent: #23557f;
+  --accent-wash: rgb(35 85 127 / 0.1);
+  --brand: #f26a10;
+  --brand-wash: rgb(242 106 16 / 0.14);
+  --temperature: #d9590b;
+  --temperature-wash: rgb(217 89 11 / 0.12);
+  --humidity: #2a6fb0;
+  --humidity-wash: rgb(42 111 176 / 0.12);
+  --building: #d5dbe0;
+  --trail-casing: rgb(255 255 255 / 0.9);
+  --good: #1f8a4c;
+  --warn: #a86b12;
+  --bad: #b83a2b;
+  --shadow: 0 1px 2px rgb(23 34 46 / 0.06), 0 12px 32px -12px rgb(23 34 46 / 0.28);
+
+  --font: "Barlow", system-ui, sans-serif;
+  --font-num: "Barlow Semi Condensed", "Barlow", system-ui, sans-serif;
+  --r-panel: 14px;
+  --r-ctl: 8px;
+  --gap: 12px;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --paper: #11161c;
+    --panel: rgb(27 34 42 / 0.92);
+    --surface: #1b222a;
+    --ink: #e4eaef;
+    --ink-2: #a9b3bd;
+    --ink-3: #85909b;
+    --rule: rgb(228 234 239 / 0.1);
+    --rule-strong: rgb(228 234 239 / 0.22);
+    --grid: rgb(228 234 239 / 0.07);
+    --axis: rgb(228 234 239 / 0.22);
+    --accent: #8ab8e0;
+    --accent-wash: rgb(138 184 224 / 0.14);
+    --brand: #ff8a3d;
+    --brand-wash: rgb(255 138 61 / 0.16);
+    --temperature: #ff8a3d;
+    --temperature-wash: rgb(255 138 61 / 0.14);
+    --humidity: #6fb2ec;
+    --humidity-wash: rgb(111 178 236 / 0.14);
+    --building: #2c3641;
+    --trail-casing: rgb(17 22 28 / 0.85);
+    --good: #4cc38a;
+    --warn: #e5b454;
+    --bad: #f08a6c;
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 16px 40px -12px rgb(0 0 0 / 0.6);
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 14px/1.45 var(--font);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p, dl, dd { margin: 0; padding: 0; }
+button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
