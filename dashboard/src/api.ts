@@ -26,10 +26,16 @@ interface RawItem {
 
 export class UnauthorizedError extends Error {}
 
-export async function loadApiUrl(): Promise<string> {
+export interface RuntimeConfig {
+  apiUrl: string;
+  signalingUrl?: string;
+  roomId?: string;
+}
+
+export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
   const response = await fetch(RUNTIME_CONFIG_PATH);
   if (!response.ok) throw new Error(`missing ${RUNTIME_CONFIG_PATH}`);
-  return (await response.json()).apiUrl;
+  return response.json();
 }
 
 export async function fetchTelemetry(apiUrl: string, apiKey: string, since: Date): Promise<Telemetry> {

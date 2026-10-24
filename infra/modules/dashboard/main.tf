@@ -81,7 +81,7 @@ resource "aws_s3_object" "file" {
 resource "aws_s3_object" "config" {
   bucket        = terraform_data.bucket.output.name
   key           = "config.json"
-  content       = jsonencode({ apiUrl = var.api_url })
+  content       = jsonencode({ apiUrl = var.api_url, signalingUrl = var.signaling_url, roomId = var.video_room_id })
   content_type  = "application/json"
   cache_control = "no-cache"
 }

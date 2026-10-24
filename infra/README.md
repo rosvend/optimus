@@ -71,6 +71,19 @@ curl "$URL?sensor=gps&from=2026-10-14T00:00:00Z&limit=20" -H "x-api-key: $KEY"
 # {"items": [{"ts": "2026-10-14T14:48:25.053Z", "lat": 6.24, "lon": -75.58, "device": "optimus"}]}
 ```
 
+## Video streaming
+
+The OpenBot app already streams its camera over WebRTC; it just needs a signaling server to meet the browser. `signaling/` is that server: an API Gateway WebSocket that relays messages between the robot and the dashboard when both join the same room. The video itself flows directly between the phone and the browser.
+
+On the phone, open **Settings > Web Controller** and set:
+
+- **Room ID:** the `video_room_id` from `terraform.tfvars` (`OPTIMUS`).
+- **Signaling server:** `<signaling_url>?key=<api_key>`, from `terraform output -raw signaling_url` and `terraform output -raw api_key`.
+
+Then pick **Web** as the controller in the General panel. The dashboard's camera panel connects on its own and asks the robot to restart its stream, so the page can be opened before or after the robot.
+
+The phone only uses a public STUN server. If the campus Wi-Fi or the mobile carrier blocks direct connections, the video won't connect and a TURN relay would be needed.
+
 ## Deploying (Roy)
 
 You need Terraform ≥ 1.6, and the `academy` AWS profile with fresh credentials from the Learner Lab "AWS Details" panel.
@@ -97,9 +110,11 @@ infra/
 ├── main.tf, variables.tf, terraform.tfvars, outputs.tf   # root: wires the modules together
 ├── modules/
 │   ├── dynamodb/   # readings table
-│   ├── lambda/     # function, public URL, log group
+│   ├── lambda/     # function, optional public URL, log group
+│   ├── signaling/  # WebSocket API and connections table for video signaling
 │   └── dashboard/  # public S3 website for the dashboard
-└── lambda/         # Python source for the function, with tests
+├── lambda/         # Python source for the telemetry API, with tests
+└── signaling/      # Python source for the signaling relay, with tests
 ```
 
 ## Tests
@@ -107,4 +122,5 @@ infra/
 ```bash
 pip install -r infra/lambda/requirements-dev.txt
 python -m pytest infra/lambda
+python -m pytest infra/signaling
 ```

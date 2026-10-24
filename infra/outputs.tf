@@ -18,3 +18,8 @@ output "dashboard_url" {
   description = "Public URL of the telemetry dashboard"
   value       = module.dashboard.url
 }
+
+output "signaling_url" {
+  description = "WebSocket URL for video signaling; the phone adds ?key=<api_key>"
+  value       = module.signaling.url
+}

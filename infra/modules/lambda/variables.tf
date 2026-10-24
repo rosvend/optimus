@@ -47,4 +47,11 @@ variable "environment" {
 variable "cors_allow_origins" {
   description = "Browser origins allowed to call the function URL"
   type        = list(string)
+  default     = []
+}
+
+variable "public_url" {
+  description = "Expose the function on a public Function URL"
+  type        = bool
+  default     = true
 }

@@ -13,6 +13,16 @@ variable "api_url" {
   type        = string
 }
 
+variable "signaling_url" {
+  description = "Video signaling WebSocket URL written into config.json"
+  type        = string
+}
+
+variable "video_room_id" {
+  description = "Room the dashboard joins to watch the robot's camera"
+  type        = string
+}
+
 variable "aws_profile" {
   description = "AWS CLI profile used to create the bucket"
   type        = string

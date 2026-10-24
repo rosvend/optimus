@@ -33,6 +33,8 @@ resource "aws_lambda_function" "function" {
 
 # Public endpoint; the handler rejects requests without the shared x-api-key
 resource "aws_lambda_function_url" "function" {
+  count = var.public_url ? 1 : 0
+
   function_name      = aws_lambda_function.function.function_name
   authorization_type = "NONE"
 

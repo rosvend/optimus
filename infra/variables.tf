@@ -52,3 +52,28 @@ variable "cors_allow_origins" {
   description = "Browser origins allowed to call the API (the dashboard)"
   type        = list(string)
 }
+
+variable "signaling_table_name" {
+  description = "DynamoDB table holding open video signaling connections"
+  type        = string
+}
+
+variable "signaling_stage" {
+  description = "Stage of the signaling WebSocket API, the last part of its URL"
+  type        = string
+}
+
+variable "signaling_throttle_burst" {
+  description = "Max burst of signaling messages per second"
+  type        = number
+}
+
+variable "signaling_throttle_rate" {
+  description = "Steady signaling messages per second"
+  type        = number
+}
+
+variable "video_room_id" {
+  description = "Room the robot and the dashboard join; set the same value in the OpenBot app"
+  type        = string
+}
