@@ -1,0 +1,50 @@
+/* Optimus's face. MapLibre positions the marker with `transform`, so only its children animate. */
+.robot svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.robot-avatar { width: 42px; height: 42px; flex: none; }
+.avatar { display: contents; }
+
+.robot-marker { width: 54px; height: 54px; cursor: pointer; }
+.robot-marker svg { filter: drop-shadow(0 6px 8px rgb(0 0 0 / 0.35)); transition: transform 200ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .robot-marker:hover svg { transform: translateY(-3px) scale(1.04); } }
+
+/* A soft ring radiates while the data is live. */
+.robot-marker::before {
+  content: ""; position: absolute; inset: 2px; border-radius: 50%;
+  border: 2px solid var(--brand); opacity: 0; pointer-events: none;
+}
+.robot-marker[data-mood="awake"]::before { animation: radiate 2.4s var(--ease-out) infinite; }
+@keyframes radiate {
+  from { opacity: 0.7; transform: scale(0.8); }
+  to { opacity: 0; transform: scale(1.9); }
+}
+
+.robot-eyes, .robot-mouth { transform-box: fill-box; transform-origin: center; transition: transform 320ms var(--ease-out), opacity 320ms ease; }
+.robot-glow { transition: opacity 320ms ease; }
+
+/* Awake: bright eyes and the odd blink. */
+.robot[data-mood="awake"] .robot-eyes { animation: blink 5.5s infinite; }
+@keyframes blink {
+  0%, 93%, 100% { transform: scaleY(1); }
+  95% { transform: scaleY(0.1); }
+}
+
+/* Curious (connecting): eyes look around. */
+.robot[data-mood="curious"] .robot-eyes { animation: look 2.6s ease-in-out infinite alternate; }
+@keyframes look {
+  0%, 30% { transform: translateX(-2.5px); }
+  70%, 100% { transform: translateX(2.5px); }
+}
+
+/* Sleepy (stale data): heavy lids, no glow. */
+.robot[data-mood="sleepy"] .robot-eyes { transform: scaleY(0.4); opacity: 0.8; }
+.robot[data-mood="sleepy"] .robot-glow,
+.robot[data-mood="asleep"] .robot-glow { opacity: 0; }
+
+/* Asleep (offline): eyes shut, smile fades. */
+.robot[data-mood="asleep"] .robot-eyes { transform: scaleY(0.12); opacity: 0.55; }
+.robot[data-mood="asleep"] .robot-mouth { opacity: 0.35; }
+
+@media (prefers-reduced-motion: reduce) {
+  .robot .robot-eyes { animation: none !important; }
+  .robot-marker[data-mood="awake"]::before { animation: none; opacity: 0.5; transform: scale(1.3); }
+}

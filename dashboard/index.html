@@ -2,86 +2,96 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="description" content="Live telemetry from Optimus, the UPB campus robot: temperature, humidity and position." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles/tokens.css" />
+    <link rel="stylesheet" href="/src/styles/layout.css" />
+    <link rel="stylesheet" href="/src/styles/panels.css" />
+    <link rel="stylesheet" href="/src/styles/robot.css" />
     <title>Optimus telemetry</title>
-    <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div>
-        <h1>Optimus</h1>
-        <p class="muted">Live telemetry</p>
-      </div>
-      <p id="status" class="status" data-kind="connecting" role="status">
-        <span class="status-icon" aria-hidden="true"></span>
-        <span class="status-label">Connecting…</span>
-      </p>
-    </header>
+    <div id="map" role="region" aria-label="Campus map with the robot's position and trail"></div>
 
-    <main>
-      <div id="ranges" class="ranges" role="group" aria-label="Time range"></div>
+    <main class="ui">
+      <header class="panel masthead" style="--i: 0">
+        <div id="avatar" class="avatar"></div>
+        <div class="masthead-text">
+          <h1>Optimus</h1>
+          <p>UPB Laureles campus</p>
+          <p id="status" class="status" data-kind="connecting" role="status">
+            <span class="status-icon" aria-hidden="true"></span>
+            <span class="status-label">Connecting…</span>
+          </p>
+        </div>
+      </header>
 
-      <section class="tiles" aria-label="Latest readings">
-        <article class="tile">
-          <h2>Temperature</h2>
-          <p class="tile-value"><span id="tile-temperature">–</span> <span class="unit">°C</span></p>
-          <p id="tile-temperature-meta" class="muted">No data yet</p>
-        </article>
-        <article class="tile">
-          <h2>Humidity</h2>
-          <p class="tile-value"><span id="tile-humidity">–</span> <span class="unit">%</span></p>
-          <p id="tile-humidity-meta" class="muted">No data yet</p>
-        </article>
-        <article class="tile">
-          <h2>Position</h2>
-          <p id="tile-position" class="tile-value tile-value-small">–</p>
-          <p id="tile-position-meta" class="muted">No fix yet</p>
-        </article>
-        <article class="tile">
-          <h2>Last reading</h2>
-          <p id="tile-last" class="tile-value">–</p>
-          <p id="tile-last-meta" class="muted">Waiting for data</p>
-        </article>
-      </section>
+      <dl class="panel kpis" style="--i: 1" aria-label="Latest readings">
+        <div class="kpi kpi-temperature">
+          <dt>Temperature</dt>
+          <dd><strong><span id="tile-temperature">–</span><small>°C</small></strong><span id="tile-temperature-meta">No data</span></dd>
+        </div>
+        <div class="kpi kpi-humidity">
+          <dt>Humidity</dt>
+          <dd><strong><span id="tile-humidity">–</span><small>%</small></strong><span id="tile-humidity-meta">No data</span></dd>
+        </div>
+        <div class="kpi">
+          <dt>Distance</dt>
+          <dd><strong id="tile-distance">–</strong><span id="tile-distance-meta">No data</span></dd>
+        </div>
+        <div class="kpi">
+          <dt>Position</dt>
+          <dd><strong id="tile-position" class="kpi-small">–</strong><span id="tile-position-meta">No data</span></dd>
+        </div>
+        <div class="kpi">
+          <dt>Last reading</dt>
+          <dd><strong id="tile-last">–</strong><span id="tile-last-meta">No data</span></dd>
+        </div>
+      </dl>
 
-      <section class="panels">
-        <article class="card card-map">
-          <header class="card-header">
-            <h2>Current location</h2>
-            <button id="recenter" class="button" type="button">Follow robot</button>
-          </header>
-          <div class="plot">
-            <div id="map" class="map" role="img" aria-label="Map of the robot's position and trail"></div>
-            <p class="empty" hidden>No GPS fix in this time range</p>
-          </div>
-        </article>
-
-        <article class="card">
-          <header class="card-header"><h2>Temperature <span class="muted">°C</span></h2></header>
-          <div class="plot chart">
+      <section class="panel sensors" style="--i: 2" aria-label="Sensor history">
+        <header class="sensors-header">
+          <h2>Sensors</h2>
+          <div id="ranges" class="ranges" role="group" aria-label="Time range"></div>
+        </header>
+        <article class="chart-block">
+          <h3><i class="swatch swatch-temperature"></i>Temperature <span>°C</span></h3>
+          <div class="chart">
             <canvas id="chart-temperature" role="img" aria-label="Temperature over time"></canvas>
-            <p class="empty" hidden>No temperature readings in this time range</p>
+            <p class="empty" hidden>No temperature readings in this range</p>
           </div>
         </article>
-
-        <article class="card">
-          <header class="card-header"><h2>Humidity <span class="muted">%</span></h2></header>
-          <div class="plot chart">
+        <article class="chart-block">
+          <h3><i class="swatch swatch-humidity"></i>Humidity <span>%</span></h3>
+          <div class="chart">
             <canvas id="chart-humidity" role="img" aria-label="Humidity over time"></canvas>
-            <p class="empty" hidden>No humidity readings in this time range</p>
+            <p class="empty" hidden>No humidity readings in this range</p>
           </div>
         </article>
       </section>
+
+      <div class="panel view" style="--i: 3" role="group" aria-label="Map view">
+        <button id="view" class="chip" type="button" aria-pressed="false">3D</button>
+        <button id="follow" class="chip" type="button" aria-pressed="true">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.5" /><path d="M8 1v2.5M8 12.5V15M1 8h2.5M12.5 8H15" /></svg>
+          Follow
+        </button>
+      </div>
     </main>
 
     <dialog id="login" class="login">
       <form>
-        <h2>Connect to Optimus</h2>
-        <p class="muted">Enter the telemetry API key. It is stored only in this browser.</p>
+        <div id="login-avatar" class="login-avatar"></div>
+        <h2>Say hi to Optimus</h2>
+        <p>Enter the telemetry API key. It's stored only in this browser.</p>
         <label for="api-key">API key</label>
         <input id="api-key" name="apiKey" type="password" autocomplete="current-password" required />
         <p id="login-error" class="error" role="alert"></p>
-        <button class="button button-primary" type="submit">Connect</button>
+        <button class="button-primary" type="submit">Connect</button>
       </form>
     </dialog>
 

@@ -1,0 +1,66 @@
+/* Full-bleed map with a pointer-transparent grid of floating panels over it. */
+#map { position: fixed; inset: 0; background: var(--paper); }
+
+.ui {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 380px;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--gap);
+  padding: 16px;
+  pointer-events: none;
+}
+
+.panel {
+  pointer-events: auto;
+  background: var(--panel);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-panel);
+  box-shadow: var(--shadow);
+  min-width: 0;
+}
+
+.masthead { grid-area: 1 / 1; }
+.kpis { grid-area: 1 / 2; align-self: start; }
+.sensors { grid-area: 1 / 3 / 4 / 4; align-self: start; max-height: 100%; overflow: auto; overscroll-behavior: contain; }
+.view { grid-area: 3 / 1; justify-self: start; align-self: end; }
+
+/* Keep MapLibre's controls clear of the sensors panel. */
+.maplibregl-ctrl-bottom-right { right: 408px; bottom: 6px; }
+
+@media (max-width: 1239px) {
+  .ui { grid-template-columns: 270px minmax(0, 1fr) 330px; }
+  .maplibregl-ctrl-bottom-right { right: 358px; }
+}
+
+/* Tablets: KPIs drop under the masthead so they get the full middle width. */
+@media (max-width: 1023px) {
+  .ui { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: auto auto minmax(0, 1fr) auto; }
+  .masthead { grid-area: 1 / 1; justify-self: start; }
+  .kpis { grid-area: 2 / 1; }
+  .sensors { grid-area: 1 / 2 / 5 / 3; }
+  .view { grid-area: 4 / 1; }
+  .maplibregl-ctrl-bottom-right { right: 348px; }
+}
+
+/* Phones: map on top, panels scroll underneath it. */
+@media (max-width: 759px) {
+  html, body { height: auto; }
+  #map { inset: 0 0 auto; height: 56dvh; }
+  .ui {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+    padding: calc(56dvh + 12px) 12px max(16px, env(safe-area-inset-bottom));
+  }
+  .masthead { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 10px; right: 10px; z-index: 2; }
+  .view { position: absolute; top: calc(56dvh - 52px); left: 10px; }
+  .kpis, .sensors { align-self: stretch; }
+  .sensors { max-height: none; overflow: visible; }
+  .maplibregl-ctrl-scale { display: none; }
+  .maplibregl-ctrl-bottom-right { right: 0; }
+}

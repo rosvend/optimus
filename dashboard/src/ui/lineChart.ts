@@ -30,7 +30,7 @@ const crosshair: Plugin<"line"> = {
   },
 };
 
-export function createLineChart(canvas: HTMLCanvasElement, unit: string): LineChart {
+export function createLineChart(canvas: HTMLCanvasElement, unit: string, color: string): LineChart {
   const empty = canvas.parentElement!.querySelector<HTMLElement>(".empty")!;
   const chart = new Chart(canvas, {
     type: "line",
@@ -51,10 +51,10 @@ export function createLineChart(canvas: HTMLCanvasElement, unit: string): LineCh
           afterBuildTicks: (axis) => {
             axis.ticks = roundTimeTicks(axis.min, axis.max).map((value) => ({ value }));
           },
-          ticks: { callback: (value) => formatTime(Number(value)) },
+          ticks: { callback: (value) => formatTime(Number(value)), font: { family: "Barlow Semi Condensed", size: 11 } },
           grid: { display: false },
         },
-        y: { grace: "10%", ticks: { maxTicksLimit: 5, callback: (value) => `${value}` }, border: { display: false } },
+        y: { grace: "10%", ticks: { maxTicksLimit: 4, callback: (value) => `${value}`, font: { family: "Barlow Semi Condensed", size: 11 } }, border: { display: false } },
       },
       plugins: {
         tooltip: {
@@ -68,9 +68,9 @@ export function createLineChart(canvas: HTMLCanvasElement, unit: string): LineCh
     },
   });
 
-  applyTheme(chart);
+  applyTheme(chart, color);
   onThemeChange(() => {
-    applyTheme(chart);
+    applyTheme(chart, color);
     chart.update();
   });
 
@@ -93,21 +93,22 @@ export function roundTimeTicks(from: number, to: number): number[] {
   return ticks;
 }
 
-function applyTheme(chart: Chart<"line">): void {
+// `color` names a CSS variable pair: --<color> for the line and --<color>-wash for the fill
+function applyTheme(chart: Chart<"line">, color: string): void {
   const dataset = chart.data.datasets[0];
-  dataset.borderColor = cssVar("--series-1");
-  dataset.backgroundColor = cssVar("--series-1-wash");
-  dataset.pointBackgroundColor = cssVar("--series-1");
+  dataset.borderColor = cssVar(`--${color}`);
+  dataset.backgroundColor = cssVar(`--${color}-wash`);
+  dataset.pointBackgroundColor = cssVar(`--${color}`);
   dataset.pointBorderColor = cssVar("--surface");
 
   const { x, y } = chart.options.scales!;
-  x!.ticks!.color = cssVar("--ink-muted");
+  x!.ticks!.color = cssVar("--ink-3");
   x!.border = { color: cssVar("--axis") };
-  y!.ticks!.color = cssVar("--ink-muted");
+  y!.ticks!.color = cssVar("--ink-3");
   y!.grid = { color: cssVar("--grid") };
 
   const tooltip = chart.options.plugins!.tooltip!;
   tooltip.backgroundColor = cssVar("--ink");
-  tooltip.titleColor = cssVar("--page");
-  tooltip.bodyColor = cssVar("--page");
+  tooltip.titleColor = cssVar("--surface");
+  tooltip.bodyColor = cssVar("--surface");
 }
