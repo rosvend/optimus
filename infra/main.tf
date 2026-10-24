@@ -40,6 +40,8 @@ module "dashboard" {
   bucket_prefix = "${var.project_name}-dashboard-"
   source_dir    = "${path.module}/../dashboard/dist"
   api_url       = module.lambda.function_url
+  aws_profile   = var.aws_profile
+  aws_region    = var.aws_region
 }
 
 # Resources were first created at the root; these keep them (and the URL) when moving into modules
