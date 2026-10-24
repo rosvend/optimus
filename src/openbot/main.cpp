@@ -16,8 +16,8 @@
 // Serial is the link to the OpenBot app: only protocol lines may be written to
 // it.
 
-Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACKWARD_PIN);
-Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACKWARD_PIN);
+Motor leftMotor(LEFT_MOTOR_FORWARD_PIN, LEFT_MOTOR_BACKWARD_PIN, LEFT_MOTOR_REVERSED);
+Motor rightMotor(RIGHT_MOTOR_FORWARD_PIN, RIGHT_MOTOR_BACKWARD_PIN, RIGHT_MOTOR_REVERSED);
 SpeedRamp leftRamp(ACCEL_PER_SECOND, REVERSE_PAUSE_MS);
 SpeedRamp rightRamp(ACCEL_PER_SECOND, REVERSE_PAUSE_MS);
 OpenBotParser parser;
