@@ -1,0 +1,14 @@
+# CrateDB speaks the PostgreSQL wire protocol, so Grafana's built-in Postgres plugin reads it
+apiVersion: 1
+datasources:
+  - name: CrateDB
+    uid: crate
+    type: grafana-postgresql-datasource
+    url: crate-db:5432
+    user: crate
+    jsonData:
+      database: doc
+      sslmode: disable
+      postgresVersion: 1400
+      timescaledb: false
+    isDefault: true

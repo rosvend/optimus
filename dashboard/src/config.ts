@@ -1,4 +1,5 @@
-// Tunables for the dashboard. The API URL is deployment-specific and loaded from /config.json at runtime.
+// Tunables for the dashboard. The API URL is deployment-specific and loaded from config.json at runtime
+// (the FIWARE microservice answers it; for npm run dev it comes from public/config.json).
 
 export const POLL_INTERVAL_MS = 5_000;
 export const STALE_AFTER_MS = 60_000;

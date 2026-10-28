@@ -40,6 +40,6 @@ pio run -e atoms3 -t upload           # keyboard control over serial (w/s/a/d, s
 
 ## Telemetry
 
-Sensor readings (temperature, humidity, GPS) go to a serverless API on AWS. See the [infra guide](infra/README.md) for the upload format and deployment.
+Sensor readings (temperature, humidity, GPS) go to a FIWARE stack (Orion, QuantumLeap, CrateDB, Grafana) behind a small microservice. See the [FIWARE guide](fiware/README.md) for the upload format and deployment.
 
-The Android app is the uploader: it parses the `e<temperature>,<humidity>` serial lines from the board, tags them with the phone GPS position, and POSTs batches to the ingest API every 15 s. A live [dashboard](dashboard/README.md) shows the latest readings, a chart per sensor and the robot's position on a map.
+The Android app is the uploader: it parses the `e<temperature>,<humidity>` serial lines from the board, tags them with the phone GPS position, and POSTs batches to the microservice every 15 s. A live [dashboard](dashboard/README.md) shows the latest readings, a chart per sensor and the robot's position on a map.

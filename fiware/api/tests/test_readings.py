@@ -13,36 +13,35 @@ def body(*readings, device="optimus"):
     return json.dumps({"device": device, "readings": list(readings)})
 
 
-def by_sensor(items):
-    return {item["sensor"]: item for item in items}
+def test_full_reading_keeps_every_sensor():
+    [reading] = parse_batch(body({"temperature": 23.4, "humidity": 55.1, "lat": 6.24, "lon": -75.58}), NOW)
+
+    assert reading == {
+        "device": "optimus",
+        "ts": "2026-10-14T15:00:00.000Z",
+        "temperature": 23.4,
+        "humidity": 55.1,
+        "lat": 6.24,
+        "lon": -75.58,
+    }
 
 
-def test_full_reading_fans_out_into_one_item_per_sensor():
-    items = by_sensor(parse_batch(body({"temperature": 23.4, "humidity": 55.1, "lat": 6.24, "lon": -75.58}), NOW))
+def test_missing_fields_are_left_out():
+    [reading] = parse_batch(body({"temperature": 20}), NOW)
 
-    assert set(items) == {"temperature", "humidity", "gps"}
-    assert items["temperature"]["value"] == 23.4
-    assert items["humidity"]["value"] == 55.1
-    assert (items["gps"]["lat"], items["gps"]["lon"]) == (6.24, -75.58)
-    assert all(item["device"] == "optimus" for item in items.values())
-
-
-def test_missing_fields_are_skipped():
-    items = parse_batch(body({"temperature": 20}), NOW)
-
-    assert [item["sensor"] for item in items] == ["temperature"]
+    assert set(reading) == {"device", "ts", "temperature"}
 
 
 def test_timestamp_is_received_time_minus_age():
-    items = parse_batch(body({"temperature": 20, "age_ms": 1500}), NOW)
+    [reading] = parse_batch(body({"temperature": 20, "age_ms": 1500}), NOW)
 
-    assert items[0]["ts"] == "2026-10-14T14:59:58.500Z"
+    assert reading["ts"] == "2026-10-14T14:59:58.500Z"
 
 
 def test_age_defaults_to_zero():
-    items = parse_batch(body({"temperature": 20}), NOW)
+    [reading] = parse_batch(body({"temperature": 20}), NOW)
 
-    assert items[0]["ts"] == "2026-10-14T15:00:00.000Z"
+    assert reading["ts"] == "2026-10-14T15:00:00.000Z"
 
 
 @pytest.mark.parametrize("reading", [
@@ -71,7 +70,7 @@ def test_invalid_readings_are_rejected(reading):
     {"temperature": 125, "humidity": 100, "lat": 90, "lon": 180},
 ])
 def test_range_limits_are_inclusive(reading):
-    assert len(parse_batch(body(reading), NOW)) == 3
+    assert len(parse_batch(body(reading), NOW)) == 1
 
 
 @pytest.mark.parametrize("raw", [
@@ -81,6 +80,8 @@ def test_range_limits_are_inclusive(reading):
     json.dumps({"readings": "nope"}),
     json.dumps({"device": "", "readings": [{"temperature": 1}]}),
     json.dumps({"device": 7, "readings": [{"temperature": 1}]}),
+    json.dumps({"device": "has space", "readings": [{"temperature": 1}]}),
+    json.dumps({"device": "x" * 65, "readings": [{"temperature": 1}]}),
 ])
 def test_invalid_batches_are_rejected(raw):
     with pytest.raises(ValidationError) as error:
@@ -107,7 +108,7 @@ def test_query_defaults():
 
     assert query.sensor == "gps"
     assert query.limit == DEFAULT_QUERY_LIMIT
-    assert query.start < "2000" and query.end > "9000"
+    assert query.start is None and query.end is None
 
 
 def test_query_normalises_time_range():

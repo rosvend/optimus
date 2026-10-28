@@ -1,14 +1,15 @@
 import json
+import re
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
+from typing import Optional
 
 from config import (
     DEFAULT_DEVICE,
     DEFAULT_QUERY_LIMIT,
+    DEVICE_PATTERN,
     MAX_QUERY_LIMIT,
     MAX_READINGS_PER_BATCH,
-    QUERY_MAX_TS,
-    QUERY_MIN_TS,
     RANGES,
     SENSORS,
 )
@@ -23,8 +24,8 @@ class ValidationError(Exception):
 @dataclass(frozen=True)
 class Query:
     sensor: str
-    start: str
-    end: str
+    start: Optional[str]
+    end: Optional[str]
     limit: int
 
 
@@ -33,7 +34,7 @@ def format_ts(moment):
 
 
 def parse_batch(body, received_at):
-    """Validates a POST body and fans each reading out into one item per sensor."""
+    """Validates a POST body into readings like {"device", "ts", "temperature"?, "humidity"?, "lat"?, "lon"?}."""
     try:
         batch = json.loads(body or "")
     except json.JSONDecodeError:
@@ -42,8 +43,8 @@ def parse_batch(body, received_at):
         raise ValidationError("body must be a JSON object")
 
     device = batch.get("device", DEFAULT_DEVICE)
-    if not isinstance(device, str) or not device:
-        raise ValidationError("device must be a non-empty string")
+    if not isinstance(device, str) or not re.fullmatch(DEVICE_PATTERN, device):
+        raise ValidationError("device must be 1-64 letters, digits, _ or -")
 
     readings = batch.get("readings")
     if not isinstance(readings, list) or not readings:
@@ -51,34 +52,31 @@ def parse_batch(body, received_at):
     if len(readings) > MAX_READINGS_PER_BATCH:
         raise ValidationError(f"at most {MAX_READINGS_PER_BATCH} readings per request", status=413)
 
-    items = []
-    for index, reading in enumerate(readings):
-        items.extend(_reading_items(reading, index, device, received_at))
-    return items
+    return [_parse_reading(reading, index, device, received_at) for index, reading in enumerate(readings)]
 
 
-def _reading_items(reading, index, device, received_at):
+def _parse_reading(reading, index, device, received_at):
     if not isinstance(reading, dict):
         raise ValidationError(f"reading {index} must be an object")
 
     age_ms = reading.get("age_ms", 0)
     if not _is_int(age_ms) or age_ms < 0:
         raise ValidationError(f"reading {index}: age_ms must be a non-negative integer")
-    base = {"device": device, "ts": format_ts(received_at - timedelta(milliseconds=age_ms))}
 
-    items = []
+    values = {}
     for sensor in ("temperature", "humidity"):
         if sensor in reading:
-            items.append({**base, "sensor": sensor, "value": _in_range(reading, sensor, index)})
+            values[sensor] = _in_range(reading, sensor, index)
 
     if ("lat" in reading) != ("lon" in reading):
         raise ValidationError(f"reading {index}: lat and lon must be sent together")
     if "lat" in reading:
-        items.append({**base, "sensor": "gps", "lat": _in_range(reading, "lat", index), "lon": _in_range(reading, "lon", index)})
+        values["lat"] = _in_range(reading, "lat", index)
+        values["lon"] = _in_range(reading, "lon", index)
 
-    if not items:
+    if not values:
         raise ValidationError(f"reading {index} has no sensor values")
-    return items
+    return {"device": device, "ts": format_ts(received_at - timedelta(milliseconds=age_ms)), **values}
 
 
 def _in_range(reading, field, index):
@@ -113,15 +111,15 @@ def parse_query(params):
 
     return Query(
         sensor=sensor,
-        start=_parse_time(params.get("from"), QUERY_MIN_TS),
-        end=_parse_time(params.get("to"), QUERY_MAX_TS),
+        start=_parse_time(params.get("from")),
+        end=_parse_time(params.get("to")),
         limit=min(limit, MAX_QUERY_LIMIT),
     )
 
 
-def _parse_time(value, default):
+def _parse_time(value):
     if value is None:
-        return default
+        return None
     try:
         moment = datetime.fromisoformat(value)
     except ValueError:

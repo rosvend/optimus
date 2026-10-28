@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Builds the JSON body expected by the telemetry Lambda (see infra/README.md):
+ * Builds the JSON body expected by the FIWARE telemetry microservice (see fiware/README.md):
  *
  * <pre>{@code
  * {"device":"optimus","readings":[{"age_ms":1200,"temperature":23.4,"humidity":55.1,"lat":6.24,"lon":-75.58}]}

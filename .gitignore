@@ -86,3 +86,6 @@ infra/build/
 # Python
 __pycache__/
 .pytest_cache/
+
+# FIWARE stack secrets
+fiware/.env

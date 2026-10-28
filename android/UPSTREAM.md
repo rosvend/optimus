@@ -9,6 +9,7 @@ Copia de `android/` de [ob-f/OpenBot](https://github.com/ob-f/OpenBot) en el com
 - `robot/src/main/java/org/openbot/app/robot/robot/RobotInfoFragment.java`: muestra temperatura y humedad.
 - `robot/src/main/res/layout/fragment_robot_info.xml`, `robot/src/main/res/values/strings.xml`: fila "Temp / Humedad".
 - `robot/src/test/java/org/openbot/app/robot/env/VehicleTest.java`: tests del mensaje `e`.
+- `robot/src/main/java/org/openbot/app/robot/telemetry/`, `robot/telemetry.properties.example`: subida de telemetría al microservicio FIWARE (`fiware/`), antes a AWS.
 
 ## Compilar
 

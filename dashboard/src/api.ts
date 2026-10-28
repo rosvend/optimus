@@ -43,7 +43,8 @@ export async function fetchTelemetry(apiUrl: string, apiKey: string, since: Date
 }
 
 async function fetchSensor(apiUrl: string, apiKey: string, sensor: string, since: Date): Promise<RawItem[]> {
-  const url = new URL(apiUrl);
+  // Relative when the FIWARE microservice serves the dashboard itself
+  const url = new URL(apiUrl, window.location.href);
   url.search = new URLSearchParams({ sensor, from: since.toISOString(), limit: String(QUERY_LIMIT) }).toString();
   const response = await fetch(url, { headers: { "x-api-key": apiKey } });
   if (response.status === 401) throw new UnauthorizedError("invalid API key");

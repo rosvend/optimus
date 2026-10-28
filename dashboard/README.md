@@ -1,32 +1,31 @@
 # Optimus dashboard
 
-A live view of the robot's telemetry on a full-screen campus map: the latest readings, the robot's trail (in 2D or with 3D buildings), and a chart per sensor. Optimus shows up as a little robot face whose eyes follow the data: awake when it's live, sleepy when it goes stale, asleep when the API is unreachable. It polls the [telemetry API](../infra/README.md) every few seconds.
+A live view of the robot's telemetry on a full-screen campus map: the latest readings, the robot's trail (in 2D or with 3D buildings), and a chart per sensor. Optimus shows up as a little robot face whose eyes follow the data: awake when it's live, sleepy when it goes stale, asleep when the API is unreachable. It polls the [telemetry API](../fiware/README.md) every few seconds.
 
 ## Run it locally
 
 ```bash
 cd dashboard
 npm install
-cp public/config.example.json public/config.json   # then paste the API URL into it
+cp public/config.example.json public/config.json   # points at the FIWARE api on localhost
 npm run dev
 ```
 
-Open the printed URL and enter the API key when asked. The key is stored only in your browser.
+Start the [FIWARE stack](../fiware/README.md) first, then open the printed URL and enter the API key when asked. The key is stored only in your browser.
 
 ## Settings
 
-- **API URL:** `public/config.json` locally. On AWS, Terraform writes it for you.
+- **API URL:** `public/config.json` locally. When the FIWARE microservice serves the dashboard, it answers `config.json` itself.
 - **Everything else:** poll interval, time ranges, staleness threshold, campus bounds, basemaps and the 3D view live in [`src/config.ts`](src/config.ts).
 - **Colors and fonts:** the tokens in [`src/styles/tokens.css`](src/styles/tokens.css), with light and dark values.
 
 ## Deploy
 
-The dashboard is a static site in a public S3 bucket, deployed with the rest of the infra:
+The FIWARE microservice builds the dashboard into its image and serves it at `/`:
 
 ```bash
-cd dashboard && npm run build && cd ../infra
-terraform apply
-terraform output -raw dashboard_url
+cd fiware
+docker compose up -d --build api
 ```
 
 ## Layout
@@ -34,7 +33,7 @@ terraform output -raw dashboard_url
 ```
 dashboard/
 ├── index.html            # page structure
-├── public/               # config.json (API URL, gitignored)
+├── public/               # config.json for npm run dev (API URL, gitignored)
 ├── src/
 │   ├── main.ts           # polling loop that wires data to the widgets
 │   ├── api.ts            # API client and response parsing
