@@ -13,7 +13,7 @@ import timber.log.Timber;
 
 /**
  * Cloud telemetry: tags env readings from the robot with the phone GPS position, buffers them,
- * and periodically POSTs batches to the AWS ingest API.
+ * and periodically POSTs batches to the FIWARE telemetry microservice.
  *
  * <p>Readings stay buffered while the request fails (offline, bad key), and are retried on the
  * next flush; {@code age_ms} keeps their real capture time. The endpoint URL and API key are

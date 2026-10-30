@@ -30,6 +30,14 @@
         </div>
       </header>
 
+      <section id="camera" class="panel camera" style="--i: 1" aria-label="Robot camera" hidden>
+        <header class="camera-header">
+          <h2>Camera</h2>
+          <span class="camera-state" role="status">Connecting…</span>
+        </header>
+        <video autoplay muted playsinline></video>
+      </section>
+
       <dl class="panel kpis" style="--i: 1" aria-label="Latest readings">
         <div class="kpi kpi-temperature">
           <dt>Temperature</dt>

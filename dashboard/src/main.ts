@@ -1,6 +1,7 @@
-import { fetchTelemetry, loadApiUrl, UnauthorizedError, type Telemetry } from "./api";
+import { fetchTelemetry, loadRuntimeConfig, UnauthorizedError, type RuntimeConfig, type Telemetry } from "./api";
 import { API_KEY_STORAGE, DEFAULT_RANGE_MINUTES, POLL_INTERVAL_MS, STALE_AFTER_MS } from "./config";
 import { formatAge } from "./format";
+import { createCameraPanel } from "./ui/camera";
 import { createLineChart } from "./ui/lineChart";
 import { askForApiKey } from "./ui/login";
 import { createRobotMap } from "./ui/map";
@@ -8,6 +9,7 @@ import { renderRanges } from "./ui/ranges";
 import { createRobotElement, moodFor, setMood, useRobotFavicon } from "./ui/robot";
 import { setStatus as setStatusLabel, type StatusKind } from "./ui/status";
 import { latestTimestamp, renderTiles } from "./ui/tiles";
+import { watchRobotCamera } from "./video";
 
 useRobotFavicon();
 document.querySelector("#avatar")!.append(createRobotElement("robot-avatar"));
@@ -29,14 +31,22 @@ renderRanges(document.querySelector("#ranges")!, rangeMinutes, (minutes) => {
 });
 
 async function start(): Promise<void> {
+  let config: RuntimeConfig;
   try {
-    apiUrl = await loadApiUrl();
+    config = await loadRuntimeConfig();
   } catch {
     setStatus("offline", "Missing config.json");
     return;
   }
+  apiUrl = config.apiUrl;
   if (!apiKey) await login();
   refresh();
+  if (config.signalingUrl && config.roomId) startCamera(config.signalingUrl, config.roomId);
+}
+
+function startCamera(url: string, roomId: string): void {
+  const camera = createCameraPanel(document.querySelector("#camera")!);
+  watchRobotCamera({ url, roomId, apiKey: () => apiKey, onStream: camera.showStream, onState: camera.showState });
 }
 
 async function refresh(): Promise<void> {

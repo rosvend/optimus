@@ -1,4 +1,5 @@
-// Tunables for the dashboard. The API URL is deployment-specific and loaded from /config.json at runtime.
+// Tunables for the dashboard. The API and signaling URLs are deployment-specific and loaded from config.json
+// at runtime (the FIWARE microservice answers it; for npm run dev it comes from public/config.json).
 
 export const POLL_INTERVAL_MS = 5_000;
 export const STALE_AFTER_MS = 60_000;
@@ -31,6 +32,13 @@ export const BUILDINGS_SOURCE_LAYER = "buildings";
 export const DEFAULT_BUILDING_HEIGHT_M = 10;
 export const VIEW_3D = { pitch: 58, bearing: -24 };
 export const START_IN_3D = true;
+
+// Robot camera over WebRTC; the signaling URL and room come from config.json
+export const SIGNALING_KEY_PARAM = "key";
+export const VIDEO_ICE_SERVERS: RTCIceServer[] = [{ urls: "stun:stun.l.google.com:19302" }];
+export const VIDEO_RECONNECT_MS = 5_000;
+// Gives the phone time to release the camera between stopping and restarting its stream
+export const VIDEO_RESTART_GAP_MS = 1_000;
 
 export const API_KEY_STORAGE = "optimus.apiKey";
 export const RUNTIME_CONFIG_PATH = "config.json";

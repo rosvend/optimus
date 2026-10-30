@@ -26,10 +26,16 @@ interface RawItem {
 
 export class UnauthorizedError extends Error {}
 
-export async function loadApiUrl(): Promise<string> {
+export interface RuntimeConfig {
+  apiUrl: string;
+  signalingUrl?: string;
+  roomId?: string;
+}
+
+export async function loadRuntimeConfig(): Promise<RuntimeConfig> {
   const response = await fetch(RUNTIME_CONFIG_PATH);
   if (!response.ok) throw new Error(`missing ${RUNTIME_CONFIG_PATH}`);
-  return (await response.json()).apiUrl;
+  return response.json();
 }
 
 export async function fetchTelemetry(apiUrl: string, apiKey: string, since: Date): Promise<Telemetry> {
@@ -43,7 +49,8 @@ export async function fetchTelemetry(apiUrl: string, apiKey: string, since: Date
 }
 
 async function fetchSensor(apiUrl: string, apiKey: string, sensor: string, since: Date): Promise<RawItem[]> {
-  const url = new URL(apiUrl);
+  // Relative when the FIWARE microservice serves the dashboard itself
+  const url = new URL(apiUrl, window.location.href);
   url.search = new URLSearchParams({ sensor, from: since.toISOString(), limit: String(QUERY_LIMIT) }).toString();
   const response = await fetch(url, { headers: { "x-api-key": apiKey } });
   if (response.status === 401) throw new UnauthorizedError("invalid API key");

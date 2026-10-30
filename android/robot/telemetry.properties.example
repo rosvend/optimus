@@ -1,5 +1,5 @@
 # Cloud telemetry ingest endpoint. Copy this file to telemetry.properties (gitignored)
-# and fill in the values from the infra guide (ask Roy for the URL and API key).
+# and fill in the values from fiware/README.md: http://<host>/api/readings and the API_KEY in fiware/.env.
 # The values become BuildConfig defaults; they can also be edited at runtime in the
 # app settings under "Cloud Telemetry".
 TELEMETRY_URL=

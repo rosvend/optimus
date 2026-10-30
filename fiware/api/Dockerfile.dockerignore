@@ -1,0 +1,8 @@
+*
+!dashboard
+!fiware/api
+dashboard/node_modules
+dashboard/dist
+dashboard/public/config.json
+fiware/api/tests
+**/__pycache__

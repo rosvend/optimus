@@ -1,0 +1,75 @@
+{
+  "uid": "optimus",
+  "title": "Optimus telemetry",
+  "schemaVersion": 39,
+  "version": 1,
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "refresh": "10s",
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Temperatura",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crate"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "celsius",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT time_index AS \"time\", temperature AS \"Temperatura\" FROM doc.etrobot WHERE temperature IS NOT NULL AND $__timeFilter(time_index) ORDER BY 1"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Humedad",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "crate"
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "humidity",
+          "decimals": 1
+        },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code",
+          "rawSql": "SELECT time_index AS \"time\", humidity AS \"Humedad\" FROM doc.etrobot WHERE humidity IS NOT NULL AND $__timeFilter(time_index) ORDER BY 1"
+        }
+      ]
+    }
+  ]
+}

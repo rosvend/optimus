@@ -65,6 +65,11 @@ public class MultiBoxTracker {
   private final Queue<Integer> availableColors = new LinkedList<Integer>();
   private final List<TrackedRecognition> trackedObjects = new LinkedList<TrackedRecognition>();
   private final Paint boxPaint = new Paint();
+  // Optimus: the stream is 640 px wide at most, so it gets thinner lines and smaller labels
+  private static final float STREAM_STROKE_PX = 3.0f;
+  private static final float STREAM_TEXT_SIZE_PX = 14.0f;
+  private final Paint streamBoxPaint = new Paint();
+  private final BorderedText streamText = new BorderedText(STREAM_TEXT_SIZE_PX);
   private final float textSizePx;
   private final BorderedText borderedText;
   private Matrix frameToCanvasMatrix;
@@ -86,6 +91,9 @@ public class MultiBoxTracker {
     boxPaint.setStrokeCap(Cap.ROUND);
     boxPaint.setStrokeJoin(Join.ROUND);
     boxPaint.setStrokeMiter(100);
+
+    streamBoxPaint.set(boxPaint);
+    streamBoxPaint.setStrokeWidth(STREAM_STROKE_PX);
 
     textSizePx =
         TypedValue.applyDimension(
@@ -203,11 +211,26 @@ public class MultiBoxTracker {
 
   public synchronized void draw(final Canvas canvas) {
     updateFrameToCanvasMatrix(canvas.getHeight(), canvas.getWidth());
+    drawRecognitions(canvas, getFrameToCanvasMatrix(), boxPaint, borderedText);
+  }
 
+  /**
+   * Optimus: draws the boxes on the WebRTC stream. frameToStream maps frame coordinates (those of
+   * the tracked locations) onto the canvas.
+   */
+  public synchronized void drawOnStream(final Canvas canvas, final Matrix frameToStream) {
+    drawRecognitions(canvas, frameToStream, streamBoxPaint, streamText);
+  }
+
+  private void drawRecognitions(
+      final Canvas canvas,
+      final Matrix frameToCanvas,
+      final Paint boxPaint,
+      final BorderedText borderedText) {
     for (final TrackedRecognition recognition : trackedObjects) {
       final RectF trackedPos = new RectF(recognition.location);
 
-      getFrameToCanvasMatrix().mapRect(trackedPos);
+      frameToCanvas.mapRect(trackedPos);
       boxPaint.setColor(recognition.color);
 
       float cornerSize = Math.min(trackedPos.width(), trackedPos.height()) / 8.0f;

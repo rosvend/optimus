@@ -14,6 +14,16 @@
 .status[data-kind="offline"] { background: color-mix(in srgb, var(--bad) 14%, transparent); color: var(--bad); }
 .status[data-kind="offline"] .status-icon { background: var(--bad); }
 
+/* Camera. */
+.camera { padding: 10px 10px 10px; }
+.camera-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 0 4px 8px 6px; }
+.camera-state { display: inline-flex; align-items: center; gap: 6px; color: var(--ink-3); font: 500 12px/1.2 var(--font-num); }
+.camera-state::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); }
+.camera[data-state="live"] .camera-state { color: var(--good); }
+.camera[data-state="live"] .camera-state::before { background: var(--good); }
+.camera[data-state="offline"] .camera-state::before { background: var(--bad); }
+.camera video { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 9px; background: #0b0f14; }
+
 /* KPI strip: one row of readings separated by hairlines. */
 .kpis { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); padding: 4px 0; }
 .kpi { padding: 10px 14px 11px; border-left: 1px solid var(--rule); min-width: 0; }

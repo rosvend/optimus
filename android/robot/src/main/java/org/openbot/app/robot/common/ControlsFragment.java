@@ -422,17 +422,18 @@ public abstract class ControlsFragment extends Fragment implements ServerListene
     BotToControllerEventBus.emitEvent(ConnectionUtils.createStatus("INDICATOR_STOP", value == 0));
   }
 
-  private boolean allGranted = true;
+  // Optimus: connects the controller the user picked (Web opens the signaling WebSocket, not
+  // Nearby), and judges each request on its own so one denial doesn't block later grants.
   protected final ActivityResultLauncher<String[]> requestPermissionLauncher =
       registerForActivityResult(
           new ActivityResultContracts.RequestMultiplePermissions(),
           result -> {
-            result.forEach((permission, granted) -> allGranted = allGranted && granted);
+            boolean allGranted = !result.containsValue(false);
 
-            if (allGranted) phoneController.connect(requireContext());
-            else {
-              PermissionUtils.showControllerPermissionsToast(requireActivity());
-            }
+            if (!allGranted) PermissionUtils.showControllerPermissionsToast(requireActivity());
+            else if (Enums.ControlMode.getByID(preferencesManager.getControlMode())
+                == Enums.ControlMode.WEBSERVER) phoneController.connectWebServer();
+            else phoneController.connect(requireContext());
           });
 
   @NotNull

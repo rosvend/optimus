@@ -529,6 +529,19 @@ public class ObjectNavFragment extends CameraFragment {
     }
   }
 
+  // Optimus: shows the detected people on the WebRTC stream too
+  @Override
+  protected void drawStreamOverlay(Canvas canvas, Matrix frameToStream) {
+    MultiBoxTracker tracker = this.tracker;
+    if (tracker == null) return;
+    Matrix matrix = new Matrix(frameToStream);
+    if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+      // Detection runs on the mirrored frame; the stream isn't mirrored
+      matrix.preScale(-1, 1, getMaxAnalyseImageSize().getWidth() / 2f, 0);
+    }
+    tracker.drawOnStream(canvas, matrix);
+  }
+
   private void updateFpsUi(double processingTimeMs) {
     requireActivity()
         .runOnUiThread(
