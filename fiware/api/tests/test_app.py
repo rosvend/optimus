@@ -122,5 +122,18 @@ def test_cors_preflight_needs_no_key(client):
     assert "x-api-key" in response.headers["Access-Control-Allow-Headers"]
 
 
-def test_dashboard_config_points_at_the_api(client):
-    assert client.get("/config.json").get_json() == {"apiUrl": "api/readings"}
+def test_dashboard_config_points_at_the_api_and_signaling(client):
+    assert client.get("/config.json", base_url="http://robot.example").get_json() == {
+        "apiUrl": "api/readings",
+        "signalingUrl": "ws://robot.example/signaling",
+        "roomId": "OPTIMUS",
+    }
+
+
+def test_dashboard_config_uses_secure_websockets_over_https(client):
+    assert client.get("/config.json", base_url="https://robot.example").get_json()["signalingUrl"] == "wss://robot.example/signaling"
+
+
+def test_signaling_handshake_requires_the_api_key(client):
+    assert client.get("/signaling", query_string={"key": "wrong"}).status_code == 401
+    assert client.get("/signaling").status_code == 401

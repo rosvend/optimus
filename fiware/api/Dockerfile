@@ -14,5 +14,6 @@ COPY fiware/api/*.py ./
 COPY --from=dashboard /dashboard/dist ./static
 ENV STATIC_DIR=/app/static
 EXPOSE 8000
-# One process: it keeps the "subscription exists" flag; threads handle concurrent requests
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "8", "--access-logfile", "-", "app:from_env()"]
+# One process: it keeps the "subscription exists" flag and the signaling rooms; threads handle concurrent
+# requests, and each open signaling WebSocket holds one
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "32", "--access-logfile", "-", "app:from_env()"]

@@ -24,6 +24,7 @@
 }
 
 .masthead { grid-area: 1 / 1; }
+.camera { grid-area: 2 / 1; align-self: start; }
 .kpis { grid-area: 1 / 2; align-self: start; }
 .sensors { grid-area: 1 / 3 / 4 / 4; align-self: start; max-height: 100%; overflow: auto; overscroll-behavior: contain; }
 .view { grid-area: 3 / 1; justify-self: start; align-self: end; }
@@ -41,6 +42,7 @@
   .ui { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: auto auto minmax(0, 1fr) auto; }
   .masthead { grid-area: 1 / 1; justify-self: start; }
   .kpis { grid-area: 2 / 1; }
+  .camera { grid-area: 3 / 1; justify-self: start; width: 300px; }
   .sensors { grid-area: 1 / 2 / 5 / 3; }
   .view { grid-area: 4 / 1; }
   .maplibregl-ctrl-bottom-right { right: 348px; }
@@ -59,7 +61,7 @@
   }
   .masthead { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 10px; right: 10px; z-index: 2; }
   .view { position: absolute; top: calc(56dvh - 52px); left: 10px; }
-  .kpis, .sensors { align-self: stretch; }
+  .camera, .kpis, .sensors { align-self: stretch; width: auto; }
   .sensors { max-height: none; overflow: visible; }
   .maplibregl-ctrl-scale { display: none; }
   .maplibregl-ctrl-bottom-right { right: 0; }

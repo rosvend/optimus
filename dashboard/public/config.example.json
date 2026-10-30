@@ -1,3 +1,5 @@
 {
-  "apiUrl": "http://localhost/api/readings"
+  "apiUrl": "http://localhost/api/readings",
+  "signalingUrl": "ws://localhost/signaling",
+  "roomId": "OPTIMUS"
 }

@@ -1,18 +1,29 @@
 import hmac
 import os
+import threading
 from datetime import datetime, timezone
 
 from flask import Flask, jsonify, request, send_from_directory
+from flask_sock import Sock
 
-from config import API_KEY_HEADER
+from config import (API_KEY_HEADER, DEFAULT_VIDEO_ROOM_ID, SIGNALING_KEY_PARAM, SIGNALING_PATH,
+                    SIGNALING_PING_INTERVAL_S)
 from orion import BackendError
 from readings import ValidationError, parse_batch, parse_query
+from signaling import Relay
 
 API_PATH = "/api/readings"
 
 
-def create_app(orion, history, api_key, now=lambda: datetime.now(timezone.utc), static_dir=None):
+def create_app(orion, history, api_key, now=lambda: datetime.now(timezone.utc), static_dir=None,
+               room_id=DEFAULT_VIDEO_ROOM_ID, relay=None):
     app = Flask(__name__, static_folder=static_dir, static_url_path="")
+    app.config["SOCK_SERVER_OPTIONS"] = {"ping_interval": SIGNALING_PING_INTERVAL_S}
+    sock = Sock(app)
+    relay = relay or Relay()
+
+    def authorized(sent):
+        return hmac.compare_digest(sent.encode(), api_key.encode())
 
     @app.after_request
     def allow_cross_origin(response):
@@ -24,8 +35,7 @@ def create_app(orion, history, api_key, now=lambda: datetime.now(timezone.utc), 
 
     @app.route(API_PATH, methods=["GET", "POST"])
     def readings():
-        sent = request.headers.get(API_KEY_HEADER, "")
-        if not hmac.compare_digest(sent.encode(), api_key.encode()):
+        if not authorized(request.headers.get(API_KEY_HEADER, "")):
             return jsonify(error="unauthorized"), 401
         try:
             if request.method == "POST":
@@ -39,10 +49,27 @@ def create_app(orion, history, api_key, now=lambda: datetime.now(timezone.utc), 
             app.logger.warning("%s", error)
             return jsonify(error="FIWARE backend unavailable"), 502
 
-    # The dashboard reads its API URL from here; it is served by this same app
+    # Refuses the WebSocket handshake itself, so the phone sees a failed connection and not an open one
+    @app.before_request
+    def check_signaling_key():
+        if request.path == SIGNALING_PATH and not authorized(request.args.get(SIGNALING_KEY_PARAM, "")):
+            return jsonify(error="unauthorized"), 401
+
+    @sock.route(SIGNALING_PATH)
+    def signaling(ws):
+        peer = _Peer(ws)
+        try:
+            while True:
+                relay.receive(peer, ws.receive())
+        finally:
+            relay.leave(peer)
+
+    # The dashboard reads its API and signaling URLs from here; it is served by this same app
     @app.get("/config.json")
     def dashboard_config():
-        return jsonify(apiUrl=API_PATH.lstrip("/"))
+        scheme = "wss" if request.scheme == "https" else "ws"
+        return jsonify(apiUrl=API_PATH.lstrip("/"), signalingUrl=f"{scheme}://{request.host}{SIGNALING_PATH}",
+                       roomId=room_id)
 
     @app.get("/")
     def dashboard():
@@ -59,4 +86,17 @@ def from_env():
 
     orion = OrionClient(os.environ["ORION_URL"], os.environ["NOTIFY_URL"])
     history = CrateHistory(os.environ["CRATE_URL"])
-    return create_app(orion, history, os.environ["API_KEY"], static_dir=os.environ.get("STATIC_DIR"))
+    return create_app(orion, history, os.environ["API_KEY"], static_dir=os.environ.get("STATIC_DIR"),
+                      room_id=os.environ.get("VIDEO_ROOM_ID") or DEFAULT_VIDEO_ROOM_ID)
+
+
+class _Peer:
+    """A signaling socket that other connections' threads can send to, one message at a time."""
+
+    def __init__(self, ws):
+        self._ws = ws
+        self._lock = threading.Lock()
+
+    def send(self, data):
+        with self._lock:
+            self._ws.send(data)

@@ -5,7 +5,7 @@
 name: optimus-fiware
 
 services:
-  # Microservice: telemetry API + dashboard. The only service exposed to the internet.
+  # Microservice: telemetry API, video signaling WebSocket and dashboard. The only service exposed to the internet.
   api:
     build:
       context: ..
@@ -20,6 +20,8 @@ services:
       # Where Orion (not the api) reaches QuantumLeap
       - NOTIFY_URL=http://quantumleap:8668/v2/notify
       - CRATE_URL=http://crate-db:4200
+      # Room the phone and the dashboard meet in to set up the camera stream (Settings > Web Controller)
+      - VIDEO_ROOM_ID=${VIDEO_ROOM_ID:-OPTIMUS}
     ports:
       - "${API_PORT:-80}:8000"
     restart: unless-stopped

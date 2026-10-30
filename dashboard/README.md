@@ -1,6 +1,6 @@
 # Optimus dashboard
 
-A live view of the robot's telemetry on a full-screen campus map: the latest readings, the robot's trail (in 2D or with 3D buildings), and a chart per sensor. Optimus shows up as a little robot face whose eyes follow the data: awake when it's live, sleepy when it goes stale, asleep when the API is unreachable. It polls the [telemetry API](../fiware/README.md) every few seconds.
+A live view of the robot's telemetry on a full-screen campus map: the latest readings, the robot's trail (in 2D or with 3D buildings), and a chart per sensor. Optimus shows up as a little robot face whose eyes follow the data: awake when it's live, sleepy when it goes stale, asleep when the API is unreachable. It polls the [telemetry API](../fiware/README.md) every few seconds, and shows the robot's camera over WebRTC through the api's [video signaling](../fiware/README.md#video-streaming) WebSocket.
 
 ## Run it locally
 
@@ -15,7 +15,7 @@ Start the [FIWARE stack](../fiware/README.md) first, then open the printed URL a
 
 ## Settings
 
-- **API URL:** `public/config.json` locally. When the FIWARE microservice serves the dashboard, it answers `config.json` itself.
+- **API URL, signaling URL and room:** `public/config.json` locally. When the FIWARE microservice serves the dashboard, it answers `config.json` itself. Without `signalingUrl` the camera panel stays hidden.
 - **Everything else:** poll interval, time ranges, staleness threshold, campus bounds, basemaps and the 3D view live in [`src/config.ts`](src/config.ts).
 - **Colors and fonts:** the tokens in [`src/styles/tokens.css`](src/styles/tokens.css), with light and dark values.
 
@@ -33,16 +33,18 @@ docker compose up -d --build api
 ```
 dashboard/
 ├── index.html            # page structure
-├── public/               # config.json for npm run dev (API URL, gitignored)
+├── public/               # config.json for npm run dev (API and signaling URLs, gitignored)
 ├── src/
 │   ├── main.ts           # polling loop that wires data to the widgets
 │   ├── api.ts            # API client and response parsing
 │   ├── config.ts         # tunables
 │   ├── format.ts         # number, distance and time formatting
 │   ├── geo.ts            # trail length and GeoJSON
+│   ├── signaling.ts      # OpenBot WebRTC signaling messages
+│   ├── video.ts          # WebRTC connection to the robot's camera
 │   ├── theme.ts          # reads colors from CSS variables, dark mode, reduced motion
 │   ├── styles/           # tokens, layout, panels, robot face
-│   └── ui/               # one file per widget: KPIs, line chart, map, robot, status, time ranges, login
+│   └── ui/               # one file per widget: camera, KPIs, line chart, map, robot, status, time ranges, login
 └── tests/
 ```
 

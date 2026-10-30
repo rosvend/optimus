@@ -11,7 +11,7 @@ browser ──▶ dashboard (served by api) ──GET + x-api-key──▶ api �
 
 | Service | Image | Port | Role |
 |---|---|---|---|
-| `api` | built from [`api/`](api/) | `80` (public) | Telemetry API and dashboard |
+| `api` | built from [`api/`](api/) | `80` (public) | Telemetry API, video signaling and dashboard |
 | `orion` | `fiware/orion:4.1.0` | `127.0.0.1:1026` | Context broker (NGSI v2), current state |
 | `mongo-db` | `mongo:6.0` | internal | Orion's database |
 | `quantumleap` | `orchestracities/quantumleap:1.0.0` | `127.0.0.1:8668` | Writes Orion notifications to CrateDB |
@@ -32,7 +32,7 @@ docker compose up -d --build
 
 - **Dashboard:** `http://<host>/`. It asks for the API key once.
 - **Grafana:** `http://<host>:3000` (user `admin`, password `GRAFANA_PASSWORD` or `admin`).
-- **Android app:** set the "Cloud Telemetry" URL to `http://<host>/api/readings` and the key from `.env`.
+- **Android app:** set the "Cloud Telemetry" URL to `http://<host>/api/readings` and the key from `.env`. For the camera, see [Video streaming](#video-streaming).
 
 After changing the dashboard or the API code, rebuild with `docker compose up -d --build api`. `docker compose down` stops everything and keeps the data; `docker compose down -v` deletes it too.
 
@@ -105,6 +105,19 @@ curl "http://<host>/api/readings?sensor=gps&from=2026-10-14T00:00:00Z&limit=20" 
 # {"items": [{"ts": "2026-10-14T14:48:25.053Z", "lat": 6.24, "lon": -75.58, "device": "optimus"}]}
 ```
 
+## Video streaming
+
+The OpenBot app already streams its camera over WebRTC; it just needs a signaling server to meet the browser. The api is that server: a WebSocket at `/signaling` that relays messages between the robot and the dashboard when both join the same room. The video itself flows directly between the phone and the browser.
+
+On the phone, open **Settings > Web Controller** and set:
+
+- **Room ID:** `VIDEO_ROOM_ID` from `.env` (default `OPTIMUS`).
+- **Signaling server:** `ws://<host>/signaling?key=<API_KEY>`.
+
+Then pick **Web** as the controller in the General panel. The dashboard's camera panel connects on its own and asks the robot to restart its stream, so the page can be opened before or after the robot.
+
+A handshake without the right `key` gets `401`. Rooms live in the api's memory, so restarting it makes both sides reconnect (they retry on their own). The phone only uses a public STUN server: if the campus Wi-Fi or the mobile carrier blocks direct connections between the phone and the browser, the video won't connect and a TURN relay would be needed.
+
 ## Layout
 
 ```
@@ -114,10 +127,11 @@ fiware/
 ├── grafana/provisioning/     # CrateDB datasource and the Optimus dashboard
 └── api/                      # microservice (Flask)
     ├── Dockerfile            # builds the dashboard, then the API image
-    ├── app.py                # routes: /api/readings, /config.json, the dashboard
+    ├── app.py                # routes: /api/readings, /signaling, /config.json, the dashboard
     ├── readings.py           # validation of uploads and queries
     ├── orion.py              # NGSI v2 entity updates and the QuantumLeap subscription
     ├── history.py            # CrateDB queries
+    ├── signaling.py          # WebRTC signaling relay between the robot and the dashboard
     ├── config.py             # tunables
     └── tests/
 ```

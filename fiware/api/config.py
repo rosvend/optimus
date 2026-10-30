@@ -31,3 +31,15 @@ VALUE_DECIMALS = 2
 
 SUBSCRIPTION_DESCRIPTION = "Optimus: Robot history to QuantumLeap"
 HTTP_TIMEOUT_S = 5
+
+# Video signaling: a WebSocket that pairs the robot's OpenBot app with the dashboard (see signaling.py)
+SIGNALING_PATH = "/signaling"
+# WebSockets can't send custom headers from the browser, so the key goes in the query string
+SIGNALING_KEY_PARAM = "key"
+DEFAULT_VIDEO_ROOM_ID = "OPTIMUS"
+# Pings keep the socket open through NAT and drop phones that vanished without closing
+SIGNALING_PING_INTERVAL_S = 25
+ROBOT_ROLE = "robot"
+BROWSER_ROLE = "browser"
+# OpenBot's join message carries only these keys
+JOIN_KEYS = {"roomId", "clientType"}
