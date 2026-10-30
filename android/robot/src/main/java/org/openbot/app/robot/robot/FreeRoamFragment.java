@@ -333,7 +333,10 @@ public class FreeRoamFragment extends ControlsFragment {
 
       case Constants.CMD_DISCONNECTED:
         handleDriveCommand();
-        setControlMode(ControlMode.GAMEPAD);
+        // Optimus: in Web mode a browser leaving (or the dashboard restarting the video stream)
+        // must not close the signaling WebSocket; the robot stays in the room for the next viewer.
+        if (ControlMode.getByID(preferencesManager.getControlMode()) != ControlMode.WEBSERVER)
+          setControlMode(ControlMode.GAMEPAD);
         break;
 
       case Constants.CMD_SPEED_DOWN:

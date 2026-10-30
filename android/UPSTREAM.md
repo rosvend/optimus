@@ -5,7 +5,8 @@ Copia de `android/` de [ob-f/OpenBot](https://github.com/ob-f/OpenBot) en el com
 ## Cambios propios de Optimus
 
 - `robot/src/main/java/org/openbot/app/robot/vehicle/Vehicle.java`: sensor ambiental (`:e:` en features, mensaje `e<°C>,<%HR>`).
-- `robot/src/main/java/org/openbot/app/robot/common/ControlsFragment.java`: despacha el mensaje `e`.
+- `robot/src/main/java/org/openbot/app/robot/common/ControlsFragment.java`: despacha el mensaje `e`. Al conceder los permisos del controlador en modo Web abre la señalización (`connectWebServer`) en vez de Nearby, y una denegación previa ya no bloquea las siguientes.
+- `robot/src/main/java/org/openbot/app/robot/robot/FreeRoamFragment.java`: en modo Web, `DISCONNECTED` (un navegador que se va, o el dashboard reiniciando el vídeo) ya no pasa a Gamepad ni cierra el WebSocket de señalización.
 - `robot/src/main/java/org/openbot/app/robot/robot/RobotInfoFragment.java`: muestra temperatura y humedad.
 - `robot/src/main/res/layout/fragment_robot_info.xml`, `robot/src/main/res/values/strings.xml`: fila "Temp / Humedad".
 - `robot/src/test/java/org/openbot/app/robot/env/VehicleTest.java`: tests del mensaje `e`.
