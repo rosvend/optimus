@@ -1,4 +1,5 @@
 import hmac
+import logging
 import os
 import threading
 from datetime import datetime, timezone
@@ -82,6 +83,8 @@ def create_app(orion, history, api_key, now=lambda: datetime.now(timezone.utc), 
 
 def from_env():
     from history import CrateHistory
+    # Shows who joins and leaves the signaling rooms in docker logs
+    logging.basicConfig(level=logging.INFO, format="[%(asctime)s] [%(name)s] %(message)s")
     from orion import OrionClient
 
     orion = OrionClient(os.environ["ORION_URL"], os.environ["NOTIFY_URL"])

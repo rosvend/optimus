@@ -1,9 +1,12 @@
 # Relays OpenBot WebRTC signaling between the robot and the dashboard in the same room,
 # like OpenBot's controller/web-server. The video itself flows directly between phone and browser.
 import json
+import logging
 import threading
 
 from config import BROWSER_ROLE, JOIN_KEYS, ROBOT_ROLE
+
+log = logging.getLogger(__name__)
 
 
 class Relay:
@@ -25,6 +28,8 @@ class Relay:
             role = ROBOT_ROLE if message.get("clientType") == ROBOT_ROLE else BROWSER_ROLE
             with self._lock:
                 self._members[connection] = (message["roomId"], role)
+                count = sum(1 for member in self._members.values() if member[0] == message["roomId"])
+            log.info("%s joined room %r (%d in the room)", role, message["roomId"], count)
             return
 
         with self._lock:
@@ -38,7 +43,9 @@ class Relay:
 
     def leave(self, connection):
         with self._lock:
-            self._members.pop(connection, None)
+            member = self._members.pop(connection, None)
+        if member:
+            log.info("%s left room %r", member[1], member[0])
 
     def role(self, connection):
         with self._lock:
