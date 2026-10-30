@@ -492,7 +492,9 @@ public class LoggerFragment extends CameraFragment {
 
       case Constants.CMD_DISCONNECTED:
         handleDriveCommand();
-        setControlMode(Enums.ControlMode.GAMEPAD);
+        // Optimus: see FreeRoamFragment; in Web mode keep the signaling WebSocket open
+        if (Enums.ControlMode.getByID(preferencesManager.getControlMode())
+            != Enums.ControlMode.WEBSERVER) setControlMode(Enums.ControlMode.GAMEPAD);
         break;
 
       case Constants.CMD_SPEED_DOWN:

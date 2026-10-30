@@ -113,6 +113,16 @@ public class WebRtcServer implements IVideoServer {
     rootEglBase = EglBase.create();
 
     signalingHandler.handleControllerWebRtcEvents();
+
+    // Optimus: switch between our own camera and the screen's camera as screens come and go
+    SharedCameraCapturer.setOwnershipListener(owned -> restartIfRunning());
+  }
+
+  // Toggling a condition stops and restarts the server only if it was running; the restart picks
+  // the capturer again and sends the viewer a fresh offer.
+  private void restartIfRunning() {
+    andGate.set("can start", false);
+    andGate.set("can start", true);
   }
 
   @Override
@@ -324,6 +334,8 @@ public class WebRtcServer implements IVideoServer {
       } catch (InterruptedException e) {
         Thread.currentThread().interrupt();
       }
+      videoCapturer.dispose();
+      videoCapturer = null;
     }
     if (peerConnection != null) {
       peerConnection.close();
@@ -532,7 +544,11 @@ public class WebRtcServer implements IVideoServer {
 
   private VideoCapturer createVideoCapturer() {
     VideoCapturer videoCapturer;
-    if (useCamera2()) {
+    if (SharedCameraCapturer.isCameraOwned()) {
+      // Optimus: the screen already has the camera open (e.g. person following); opening it
+      // again would take it away from the detector, so stream the screen's frames instead.
+      videoCapturer = new SharedCameraCapturer();
+    } else if (useCamera2()) {
       videoCapturer = createCameraCapturer(new Camera2Enumerator(context));
     } else {
       videoCapturer = createCameraCapturer(new Camera1Enumerator(true));

@@ -3,7 +3,11 @@ package org.openbot.app.robot.common;
 import android.annotation.SuppressLint;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +32,7 @@ import java.util.concurrent.Executors;
 import org.openbot.app.robot.R;
 import org.openbot.app.robot.env.ControllerToBotEventBus;
 import org.openbot.app.robot.env.ImageUtils;
+import org.openbot.app.robot.env.SharedCameraCapturer;
 import org.openbot.app.robot.utils.Constants;
 import org.openbot.app.robot.utils.Enums;
 import org.openbot.app.robot.utils.PermissionUtils;
@@ -45,6 +50,14 @@ public abstract class CameraFragment extends ControlsFragment {
   private YuvToRgbConverter converter;
   private Bitmap bitmapBuffer;
   private int rotationDegrees;
+
+  // Optimus: the WebRTC stream gets this screen's frames instead of opening the camera again
+  private static final int STREAM_MAX_SIDE_PX = 640;
+  private static final long STREAM_FRAME_INTERVAL_MS = 1000 / 15;
+  private final Matrix frameToStream = new Matrix();
+  private final Paint streamPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+  private Bitmap streamBitmap;
+  private long lastStreamFrameMs;
 
   protected View inflateFragment(int resId, LayoutInflater inflater, ViewGroup container) {
     return addCamera(inflater.inflate(resId, container, false), inflater, container);
@@ -81,6 +94,21 @@ public abstract class CameraFragment extends ControlsFragment {
     super.onViewCreated(view, savedInstanceState);
     cameraExecutor = Executors.newSingleThreadExecutor();
     subscribeToLocalCameraLifecycleEvents();
+  }
+
+  // Optimus: CameraX holds the camera between ON_START and ON_STOP. onStart runs before ON_START
+  // and onStop after ON_STOP, so the stream releases the camera before CameraX opens it and only
+  // takes it back once CameraX has let go.
+  @Override
+  public void onStart() {
+    super.onStart();
+    SharedCameraCapturer.setCameraOwned(true);
+  }
+
+  @Override
+  public void onStop() {
+    super.onStop();
+    SharedCameraCapturer.setCameraOwned(false);
   }
 
   // Allowing WebRtcServer pause/resume to handle camera preview
@@ -182,10 +210,48 @@ public abstract class CameraFragment extends ControlsFragment {
       rotationDegrees = image.getImageInfo().getRotationDegrees();
       converter.yuvToRgb(image.getImage(), bitmapBuffer);
       processFrame(bitmapBuffer, image);
+      streamFrame();
     } finally {
       image.close();
     }
   }
+
+  // Optimus: sends the frame, upright and scaled down, with the screen's overlay to the stream
+  private void streamFrame() {
+    if (!SharedCameraCapturer.isCapturing()) return;
+    long now = SystemClock.elapsedRealtime();
+    if (now - lastStreamFrameMs < STREAM_FRAME_INTERVAL_MS) return;
+    lastStreamFrameMs = now;
+
+    int width = bitmapBuffer.getWidth();
+    int height = bitmapBuffer.getHeight();
+    boolean sideways = rotationDegrees % 180 != 0;
+    float scale = Math.min(1f, (float) STREAM_MAX_SIDE_PX / Math.max(width, height));
+    // I420 needs even sizes
+    int streamWidth = Math.round((sideways ? height : width) * scale) & ~1;
+    int streamHeight = Math.round((sideways ? width : height) * scale) & ~1;
+    if (streamBitmap == null
+        || streamBitmap.getWidth() != streamWidth
+        || streamBitmap.getHeight() != streamHeight)
+      streamBitmap = Bitmap.createBitmap(streamWidth, streamHeight, Bitmap.Config.ARGB_8888);
+
+    frameToStream.reset();
+    frameToStream.postTranslate(-width / 2f, -height / 2f);
+    frameToStream.postRotate(rotationDegrees);
+    frameToStream.postScale(scale, scale);
+    frameToStream.postTranslate(streamWidth / 2f, streamHeight / 2f);
+
+    Canvas canvas = new Canvas(streamBitmap);
+    canvas.drawBitmap(bitmapBuffer, frameToStream, streamPaint);
+    drawStreamOverlay(canvas, frameToStream);
+    SharedCameraCapturer.deliver(streamBitmap);
+  }
+
+  /**
+   * Draws on top of the streamed frame, on the camera thread. frameToStream maps coordinates of
+   * the analysed frame (the bitmap given to processFrame) onto the canvas.
+   */
+  protected void drawStreamOverlay(Canvas canvas, Matrix frameToStream) {}
 
   public int getRotationDegrees() {
     return rotationDegrees;
