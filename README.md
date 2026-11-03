@@ -41,8 +41,8 @@ pio run -e tbeam_keyboard -t upload   # bench test: w/s/a/d over the serial moni
 pio device monitor -e tbeam           # serial monitor at 115200
 ```
 
-## Telemetry, dashboard and video
+## Telemetry
 
-Sensor readings (temperature, humidity, GPS) go to a FIWARE stack (Orion, QuantumLeap, CrateDB, Grafana) behind a small Flask microservice, all run with Docker Compose. See the [FIWARE guide](fiware/README.md) for deployment and the API.
+Sensor readings (temperature, humidity, GPS) go to a FIWARE stack (Orion, QuantumLeap, CrateDB, Grafana) behind a small Flask microservice, all run with Docker Compose. See the [FIWARE guide](fiware/README.md) for deployment and the API. 
 
-The Android app is the uploader: it parses the `e<temperature>,<humidity>` serial lines from the board, tags them with the phone GPS position, and POSTs batches to the microservice every 15 s. The microservice also serves the live [dashboard](dashboard/README.md), which shows the latest readings, a chart per sensor, the robot's trail on a campus map and the phone camera over WebRTC.
+The microservice also serves the live [dashboard](dashboard/README.md), which shows the latest readings, a chart per sensor, the robot's trail on a campus map and the phone camera over WebRTC.
