@@ -40,6 +40,28 @@ void test_median_window_slides() {
   TEST_ASSERT_EQUAL(14, filter.add(14));
 }
 
+void test_echo_shorter_than_one_cm_is_zero() {
+  TEST_ASSERT_EQUAL(0, echoUsToCm(57));
+  TEST_ASSERT_EQUAL(1, echoUsToCm(58));
+}
+
+void test_echo_at_max_range_is_not_clamped() {
+  TEST_ASSERT_EQUAL(SONAR_MAX_CM, echoUsToCm(SONAR_MAX_CM * 58));
+  TEST_ASSERT_EQUAL(SONAR_MAX_CM - 1, echoUsToCm(SONAR_MAX_CM * 58 - 1));
+}
+
+void test_median_of_unsorted_window() {
+  SonarFilter filter;
+  filter.add(30);
+  filter.add(10);
+  TEST_ASSERT_EQUAL(20, filter.add(20));
+}
+
+void test_steady_readings_pass_through() {
+  SonarFilter filter;
+  for (int i = 0; i < 5; i++) TEST_ASSERT_EQUAL(75, filter.add(75));
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_echo_converts_to_cm);
@@ -49,5 +71,9 @@ int main() {
   RUN_TEST(test_two_readings_average);
   RUN_TEST(test_median_drops_spike);
   RUN_TEST(test_median_window_slides);
+  RUN_TEST(test_echo_shorter_than_one_cm_is_zero);
+  RUN_TEST(test_echo_at_max_range_is_not_clamped);
+  RUN_TEST(test_median_of_unsorted_window);
+  RUN_TEST(test_steady_readings_pass_through);
   return UNITY_END();
 }

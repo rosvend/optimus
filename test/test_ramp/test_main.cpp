@@ -60,6 +60,36 @@ void test_reversal_passes_through_zero_and_pauses() {
   TEST_ASSERT_EQUAL(-255, previous);
 }
 
+void test_reverse_target_ramps_down_from_rest() {
+  SpeedRamp ramp = makeRamp();
+  ramp.setTarget(-100);
+  runFor(ramp, 2000);
+  TEST_ASSERT_EQUAL(-100, ramp.update(10));
+}
+
+void test_negative_target_is_clamped() {
+  SpeedRamp ramp = makeRamp();
+  ramp.setTarget(-999);
+  TEST_ASSERT_EQUAL(-255, ramp.target());
+}
+
+void test_zero_elapsed_time_does_not_move() {
+  SpeedRamp ramp = makeRamp();
+  ramp.setTarget(255);
+  TEST_ASSERT_EQUAL(0, ramp.update(0));
+}
+
+void test_restart_after_stop_waits_for_pause() {
+  SpeedRamp ramp = makeRamp();
+  ramp.setTarget(100);
+  runFor(ramp, 2000);
+  ramp.setTarget(0);
+  while (ramp.update(10) != 0) {}
+  ramp.setTarget(100);
+  for (int i = 0; i < 30; i++) TEST_ASSERT_EQUAL(0, ramp.update(10));
+  TEST_ASSERT_TRUE(ramp.update(10) > 0);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_starts_stopped);
@@ -68,5 +98,9 @@ int main() {
   RUN_TEST(test_clamps_target);
   RUN_TEST(test_stop_decelerates_gradually);
   RUN_TEST(test_reversal_passes_through_zero_and_pauses);
+  RUN_TEST(test_reverse_target_ramps_down_from_rest);
+  RUN_TEST(test_negative_target_is_clamped);
+  RUN_TEST(test_zero_elapsed_time_does_not_move);
+  RUN_TEST(test_restart_after_stop_waits_for_pause);
   return UNITY_END();
 }

@@ -118,6 +118,57 @@ void test_heartbeat_rejects_bad_intervals() {
   }
 }
 
+void test_several_messages_in_one_read() {
+  OpenBotParser parser;
+  const char *stream = "h250\nc10,20\nf\n";
+  MessageType seen[3];
+  int count = 0;
+  for (const char *c = stream; *c; c++) {
+    Message m = parser.feed(*c);
+    if (m.type != MessageType::None) seen[count++] = m.type;
+  }
+  TEST_ASSERT_EQUAL(3, count);
+  TEST_ASSERT_EQUAL(MessageType::Heartbeat, (int)seen[0]);
+  TEST_ASSERT_EQUAL(MessageType::Control, (int)seen[1]);
+  TEST_ASSERT_EQUAL(MessageType::Feature, (int)seen[2]);
+}
+
+void test_empty_line_is_ignored() {
+  OpenBotParser parser;
+  TEST_ASSERT_EQUAL(MessageType::None, (int)feedLine(parser, "\n").type);
+}
+
+void test_stop_command() {
+  OpenBotParser parser;
+  Message m = feedLine(parser, "c0,0\n");
+  TEST_ASSERT_EQUAL(MessageType::Control, (int)m.type);
+  TEST_ASSERT_EQUAL(0, m.left);
+  TEST_ASSERT_EQUAL(0, m.right);
+}
+
+void test_longest_line_that_fits_is_parsed() {
+  OpenBotParser parser;
+  char line[34];
+  strcpy(line, "c");
+  while (strlen(line) < 25) strcat(line, "0");
+  strcat(line, "1,-255\n");
+  TEST_ASSERT_EQUAL(32, (int)strlen(line));
+  Message m = feedLine(parser, line);
+  TEST_ASSERT_EQUAL(MessageType::Control, (int)m.type);
+  TEST_ASSERT_EQUAL(1, m.left);
+  TEST_ASSERT_EQUAL(-255, m.right);
+}
+
+void test_one_character_too_long_is_dropped() {
+  OpenBotParser parser;
+  char line[34];
+  strcpy(line, "c");
+  while (strlen(line) < 26) strcat(line, "0");
+  strcat(line, "1,-255\n");
+  TEST_ASSERT_EQUAL(33, (int)strlen(line));
+  TEST_ASSERT_EQUAL(MessageType::None, (int)feedLine(parser, line).type);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_incomplete_line_yields_nothing);
@@ -135,5 +186,10 @@ int main() {
   RUN_TEST(test_control_rejects_out_of_range_targets);
   RUN_TEST(test_control_accepts_full_range);
   RUN_TEST(test_heartbeat_rejects_bad_intervals);
+  RUN_TEST(test_several_messages_in_one_read);
+  RUN_TEST(test_empty_line_is_ignored);
+  RUN_TEST(test_stop_command);
+  RUN_TEST(test_longest_line_that_fits_is_parsed);
+  RUN_TEST(test_one_character_too_long_is_dropped);
   return UNITY_END();
 }

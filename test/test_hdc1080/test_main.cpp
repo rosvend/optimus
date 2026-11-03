@@ -17,11 +17,26 @@ void test_humidity_full_raw_is_just_under_100() {
   TEST_ASSERT_FLOAT_WITHIN(0.01f, 99.998f, hdcHumidityPct(0xFFFF));
 }
 
+void test_temperature_full_raw_is_just_under_125() {
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, 124.997f, hdcTemperatureC(0xFFFF));
+}
+
+void test_humidity_zero_raw_is_zero() {
+  TEST_ASSERT_FLOAT_WITHIN(0.01f, 0.0f, hdcHumidityPct(0x0000));
+}
+
+void test_temperature_rises_with_raw_value() {
+  TEST_ASSERT_TRUE(hdcTemperatureC(0x6001) > hdcTemperatureC(0x6000));
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_temperature_zero_raw_is_minus_40);
   RUN_TEST(test_temperature_mid_raw);
   RUN_TEST(test_humidity_half_raw_is_50);
   RUN_TEST(test_humidity_full_raw_is_just_under_100);
+  RUN_TEST(test_temperature_full_raw_is_just_under_125);
+  RUN_TEST(test_humidity_zero_raw_is_zero);
+  RUN_TEST(test_temperature_rises_with_raw_value);
   return UNITY_END();
 }

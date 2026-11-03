@@ -37,6 +37,30 @@ void test_small_buffer_is_rejected_and_terminated() {
   TEST_ASSERT_EQUAL('\0', buf[2]);
 }
 
+void test_sonar_max_distance_line() {
+  char buf[16];
+  TEST_ASSERT_TRUE(formatSonar(buf, sizeof(buf), 300));
+  TEST_ASSERT_EQUAL_STRING("s300", buf);
+}
+
+void test_exact_fit_buffer_is_accepted() {
+  char buf[5];
+  TEST_ASSERT_TRUE(formatSonar(buf, sizeof(buf), 300));
+  TEST_ASSERT_EQUAL_STRING("s300", buf);
+}
+
+void test_long_robot_type_is_rejected_and_terminated() {
+  char buf[8];
+  TEST_ASSERT_FALSE(formatFeatures(buf, sizeof(buf), "OPTIMUS"));
+  TEST_ASSERT_EQUAL('\0', buf[7]);
+}
+
+void test_env_small_buffer_is_rejected() {
+  char buf[6];
+  TEST_ASSERT_FALSE(formatEnv(buf, sizeof(buf), 23.4f, 61.2f));
+  TEST_ASSERT_EQUAL('\0', buf[5]);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_sonar_line);
@@ -45,5 +69,9 @@ int main() {
   RUN_TEST(test_env_rounds_to_one_decimal);
   RUN_TEST(test_features_line);
   RUN_TEST(test_small_buffer_is_rejected_and_terminated);
+  RUN_TEST(test_sonar_max_distance_line);
+  RUN_TEST(test_exact_fit_buffer_is_accepted);
+  RUN_TEST(test_long_robot_type_is_rejected_and_terminated);
+  RUN_TEST(test_env_small_buffer_is_rejected);
   return UNITY_END();
 }

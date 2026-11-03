@@ -44,6 +44,32 @@ void test_targets_stay_within_full_speed() {
   TEST_ASSERT_EQUAL(-255, t.right);
 }
 
+void test_repeated_forward_presses_reach_full_speed() {
+  Targets t = {0, 0};
+  for (int i = 0; i < 5; i++) t = applyKey(t, 'w', 51);
+  TEST_ASSERT_EQUAL(255, t.left);
+  TEST_ASSERT_EQUAL(255, t.right);
+}
+
+void test_backward_presses_stop_at_full_reverse() {
+  Targets t = {0, 0};
+  for (int i = 0; i < 10; i++) t = applyKey(t, 's', STEP);
+  TEST_ASSERT_EQUAL(-255, t.left);
+  TEST_ASSERT_EQUAL(-255, t.right);
+}
+
+void test_spin_while_moving_turns_instead_of_stopping() {
+  Targets t = applyKey({100, 100}, 'a', STEP);
+  TEST_ASSERT_EQUAL(50, t.left);
+  TEST_ASSERT_EQUAL(150, t.right);
+}
+
+void test_opposite_keys_cancel_out() {
+  Targets t = applyKey(applyKey({0, 0}, 'w', STEP), 's', STEP);
+  TEST_ASSERT_EQUAL(0, t.left);
+  TEST_ASSERT_EQUAL(0, t.right);
+}
+
 int main() {
   UNITY_BEGIN();
   RUN_TEST(test_forward_speeds_up_both_tracks);
@@ -53,5 +79,9 @@ int main() {
   RUN_TEST(test_stop_zeroes_both_tracks);
   RUN_TEST(test_unknown_key_keeps_targets);
   RUN_TEST(test_targets_stay_within_full_speed);
+  RUN_TEST(test_repeated_forward_presses_reach_full_speed);
+  RUN_TEST(test_backward_presses_stop_at_full_reverse);
+  RUN_TEST(test_spin_while_moving_turns_instead_of_stopping);
+  RUN_TEST(test_opposite_keys_cancel_out);
   return UNITY_END();
 }
